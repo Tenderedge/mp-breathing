@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Breathing Statistics</title>
+    <style>
+        * {
+            -webkit-tap-highlight-color: transparent;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            user-select: none;
+            box-sizing: border-box;
+        }
+        body, html {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            width: 100%;
+            background: linear-gradient(135deg, rgb(102, 126, 234) 0%, rgb(118, 75, 162) 100%);
+            background-attachment: fixed;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            align-items: center;
+            overflow-x: hidden;
+            overflow-y: auto;
+            scroll-behavior: smooth;
+            -webkit-overflow-scrolling: touch;
+        }
+        .card {
+            background-color: rgba(255, 255, 255, 0.9);
+            border-radius: 20px;
+            box-shadow: rgba(0, 0, 0, 0.2) 0px 10px 30px 0px;
+            color: rgb(51, 51, 51);
+            width: 90%;
+            max-width: 320px;
+            padding: 15px;
+            margin: 20px auto;
+        }
+        h2 {
+            margin: 0 0 15px 0;
+            font-size: 20px;
+            font-weight: bold;
+            text-align: center;
+        }
+        .stats-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+            font-size: 14px;
+        }
+        .stats-table th, .stats-table td {
+            padding: 8px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        .stats-table th {
+            background-color: rgba(74, 144, 226, 0.1);
+            font-weight: bold;
+        }
+        .back-button {
+            background-color: rgb(72, 187, 120);
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            width: 100%;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            margin-top: 15px;
+            transition: background-color 0.1s, transform 0.1s;
+            touch-action: manipulation;
+        }
+        .back-button:active {
+            background-color: rgb(62, 177, 110);
+            transform: scale(0.98);
+        }
+        .no-data {
+            text-align: center;
+            color: #666;
+            padding: 10px;
+            font-size: 14px;
+        }
+        #breathHoldHistory {
+            font-size: 13px;
+            line-height: 1.4;
+            word-break: break-word;
+            padding: 8px 0;
+        }
+        #breathHoldHistory strong {
+            font-weight: 600;
+        }
+        .calendar {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        
+        .month {
+            margin-bottom: 10px;
+        }
+        
+        .month-title {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .days {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 4px;
+            font-size: 12px;
+        }
+        
+        .day-header {
+            text-align: center;
+            font-weight: bold;
+            color: #666;
+            padding: 4px 0;
+        }
+        
+        .day {
+            aspect-ratio: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border-radius: 4px;
+            background: rgba(0, 0, 0, 0.05);
+            min-width: 24px;
+        }
+        
+        .day.empty {
+            background: none;
+        }
+        
+        .date {
+            margin-bottom: 2px;
+            font-size: 11px;
+        }
+        
+        .day .dots {
+            display: flex;
+            gap: 2px;
+        }
+        
+        .day .dot {
+            width: 4px;
+            height: 4px;
+            border-radius: 50%;
+            background: rgb(72, 187, 120);
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h2 id="title">Breathing Statistics</h2>
+        <table class="stats-table">
+            <thead>
+                <tr>
+                    <th id="headerMetric">Metric</th>
+                    <th id="headerValue">Value</th>
+                </tr>
+            </thead>
+            <tbody id="statsBody">
+                <!-- Will be populated by JavaScript -->
+            </tbody>
+        </table>
+        <button class="back-button" id="backButton" onclick="window.location.href='2.html'">Back</button>
+    </div>
+
+    <div class="card">
+        <h2>Breath Hold History</h2>
+        <div id="breathHoldHistory" style="padding: 8px 0;"></div>
+    </div>
+
+    <div class="card">
+        <h2>Calendar</h2>
+        <div id="calendar" class="calendar"></div>
+    </div>
+
+    <script>
+        const translations = {
+            en: {
+                title: "Breathing Statistics",
+                headerMetric: "Metric",
+                headerValue: "Value",
+                allTimeRecord: "All-time Record",
+                lastSession: "Last Session",
+                totalSessions: "Total Sessions",
+                monthSessions: "Sessions this month",
+                averageHold: "Average Hold Time",
+                noData: "No statistics available yet",
+                breathHoldHistory: "Breath Hold History"
+            },
+            nb: {
+                title: "Pustestatistikk",
+                headerMetric: "Metrikk",
+                headerValue: "Verdi",
+                allTimeRecord: "Beste resultat",
+                lastSession: "Siste økt",
+                totalSessions: "Totalt antall økter",
+                monthSessions: "Økter denne måneden",
+                averageHold: "Gjennomsnittlig holdetid",
+                noData: "Ingen statistikk tilgjengelig ennå",
+                breathHoldHistory: "Historikk over pusteholding"
+            },
+            es: {
+                title: "Estadísticas de Respiración",
+                headerMetric: "Métrica",
+                headerValue: "Valor",
+                allTimeRecord: "Récord histórico",
+                lastSession: "Última sesión",
+                totalSessions: "Sesiones totales",
+                monthSessions: "Sesiones este mes",
+                averageHold: "Tiempo promedio",
+                noData: "No hay estadísticas disponibles aún",
+                breathHoldHistory: "Historial de retención de respiración"
+            },
+            zh: {
+                title: "呼吸统计",
+                headerMetric: "指标",
+                headerValue: "数值",
+                allTimeRecord: "历史最佳",
+                lastSession: "上会话",
+                totalSessions: "总会话数",
+                monthSessions: "本月会话",
+                averageHold: "平均保持时间",
+                noData: "暂无统计数据",
+                breathHoldHistory: "屏息历史记录"
+            },
+            hi: {
+                title: "श्वास आंकड़े",
+                headerMetric: "मापदंड",
+                headerValue: "मान",
+                allTimeRecord: "सर्वश्रेष्ठ रिकॉर्ड",
+                lastSession: "पिछला सत्र",
+                totalSessions: "कुल सत्र",
+                monthSessions: "इस मह के सत्र",
+                averageHold: "औसत समय",
+                noData: "अभी तक कोई आंकड़े उपलब्ध नहीं हैं",
+                breathHoldHistory: "श्वास रोकने का इतिस"
+            },
+            ar: {
+                title: "إحصائيات التنفس",
+                headerMetric: "المقياس",
+                headerValue: "القيمة",
+                allTimeRecord: "أفضل رقم قياسي",
+                lastSession: "الجلس الأخيرة",
+                totalSessions: "مجموع الجلسات",
+                monthSessions: "جلسات هذا الشهر",
+                averageHold: "متوسط وقت الحبس",
+                noData: "لا توجد إحصائيات متاحة بعد",
+                breathHoldHistory: "سجل حبس النفس"
+            },
+            pt: {
+                title: "Estatísticas de Respiração",
+                headerMetric: "Métrica",
+                headerValue: "Valor",
+                allTimeRecord: "Recorde histórico",
+                lastSession: "Última sessão",
+                totalSessions: "Total de sessões",
+                monthSessions: "Sessões este mês",
+                averageHold: "Tempo médio",
+                noData: "Nenhuma estatística disponível ainda",
+                breathHoldHistory: "Histórico de retenção"
+            },
+            ru: {
+                title: "Сатистика дыхания",
+                headerMetric: "Показатель",
+                headerValue: "Значение",
+                allTimeRecord: "Рекорд",
+                lastSession: "Последняя сессия",
+                totalSessions: "Всего сессий",
+                monthSessions: "Сссий за месяц",
+                averageHold: "Среднее время",
+                noData: "Статистика пока недоступна",
+                breathHoldHistory: "История задержек дыхания"
+            },
+            ja: {
+                title: "呼吸統計",
+                headerMetric: "メトリクス",
+                headerValue: "値",
+                allTimeRecord: "最高記録",
+                lastSession: "前回のセッション",
+                totalSessions: "総セッション数",
+                monthSessions: "今月のセッション",
+                averageHold: "平均保持時",
+                noData: "まだ統計がありません",
+                breathHoldHistory: "息止め履歴"
+            },
+            de: {
+                title: "Atem-Statistiken",
+                headerMetric: "Metrik",
+                headerValue: "Wert",
+                allTimeRecord: "Bestleistung",
+                lastSession: "Letzte Sitzung",
+                totalSessions: "Gesamtsitzungen",
+                monthSessions: "Sitzungen diesen Monat",
+                averageHold: "Durchschnittliche Haltezeit",
+                noData: "Noch keine Statistiken verfügbar",
+                breathHoldHistory: "Atemhalte-Verlauf"
+            },
+            fr: {
+                title: "Statistiques de respiration",
+                headerMetric: "Métrique",
+                headerValue: "Valeur",
+                allTimeRecord: "Record absolu",
+                lastSession: "Dernière session",
+                totalSessions: "Sessions totales",
+                monthSessions: "Sessions ce mois",
+                averageHold: "Temps moyen",
+                noData: "Pas encore de statistiques disponibles",
+                breathHoldHistory: "Historique des retenues"
+            },
+            ko: {
+                title: "호흡 통계",
+                headerMetric: "지표",
+                headerValue: "값",
+                allTimeRecord: "최고 기록",
+                lastSession: "마지막 세션",
+                totalSessions: "전체 세션",
+                monthSessions: "이번 달 세션",
+                averageHold: "평 시간",
+                noData: "아직 통계가 없습니다",
+                breathHoldHistory: "호흡 참기 기록"
+            },
+            it: {
+                title: "Statistiche respirazione",
+                headerMetric: "Metrica",
+                headerValue: "Valore",
+                allTimeRecord: "Record assoluto",
+                lastSession: "Ultima sessione",
+                totalSessions: "Sessioni totali",
+                monthSessions: "Sessioni questo mese",
+                averageHold: "Tempo medio",
+                noData: "Nessuna statistica disponibile",
+                breathHoldHistory: "Cronologia trattenute"
+            },
+            tr: {
+                title: "Nefes İstatistikleri",
+                headerMetric: "Metrik",
+                headerValue: "Değer",
+                allTimeRecord: "Tüm zamanların rekoru",
+                lastSession: "Son oturum",
+                totalSessions: "Toplam oturum",
+                monthSessions: "Bu ayki oturumlar",
+                averageHold: "Ortalama süre",
+                noData: "Henüz istatistik yok",
+                breathHoldHistory: "Nefes tutma geçmişi"
+            },
+            vi: {
+                title: "Thống kê hơi thở",
+                headerMetric: "Chỉ số",
+                headerValue: "Giá trị",
+                allTimeRecord: "Kỷ lục",
+                lastSession: "Phiên gần nhất",
+                totalSessions: "Tổng số phiên",
+                monthSessions: "Phiên trong tháng",
+                averageHold: "Thời gian trung bình",
+                noData: "Chưa có thống kê",
+                breathHoldHistory: "Lịch sử giữ hơi thở"
+            },
+            pl: {
+                title: "Statystyki oddychania",
+                headerMetric: "Wskaźnik",
+                headerValue: "Wartość",
+                allTimeRecord: "Rekord wszech czasów",
+                lastSession: "Ostatnia sesja",
+                totalSessions: "Łączna liczba sesji",
+                monthSessions: "Sesje w tym miesiącu",
+                averageHold: "Średni czas",
+                noData: "Brak dostępnych statystyk",
+                breathHoldHistory: "Historia wstrzymywania oddechu"
+            }
+        };
+
+        function formatTime(seconds) {
+            const minutes = Math.floor(seconds / 60);
+            const remainingSeconds = seconds % 60;
+            return `${minutes}m ${remainingSeconds}s`;
+        }
+
+        function calculateAverageHold(breathHolds) {
+            if (!breathHolds || breathHolds.length === 0) return 0;
+            
+            const totalDuration = breathHolds.reduce((sum, hold) => {
+                // Handle both old number format and new object format
+                const duration = typeof hold === 'number' ? hold : (hold.duration || 0);
+                return sum + duration;
+            }, 0);
+            
+            return Math.round(totalDuration / breathHolds.length);
+        }
+
+        function getStats() {
+            const breathHolds = JSON.parse(localStorage.getItem('wimHofBreathHolds') || '[]');
+            
+            // Group holds into sessions (3 holds = 1 session)
+            const sessions = [];
+            for (let i = 0; i < breathHolds.length; i += 3) {
+                const sessionHolds = breathHolds.slice(i, Math.min(i + 3, breathHolds.length));
+                const timestamp = sessionHolds[0].timestamp || 
+                    (Date.now() - ((breathHolds.length - i) / 3) * 24 * 60 * 60 * 1000);  // Estimate date for old data
+                sessions.push({
+                    holds: sessionHolds,
+                    timestamp: timestamp
+                });
+            }
+
+            // Calculate stats using sessions
+            const currentMonth = new Date().getMonth();
+            const currentYear = new Date().getFullYear();
+            
+            const monthSessions = sessions.filter(session => {
+                const date = new Date(session.timestamp);
+                return date.getMonth() === currentMonth && date.getFullYear() === currentYear;
+            }).length;
+
+            return {
+                record: parseInt(localStorage.getItem('wimHofRecord')) || 0,
+                lastSession: parseInt(localStorage.getItem('wimHofLastSession')) || 0,
+                sessions: sessions.length,
+                monthSessions: monthSessions,
+                averageHold: calculateAverageHold(breathHolds)
+            };
+        }
+
+        // Add a helper function to format the month
+        function formatMonth(date) {
+            const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+            return `${months[date.getMonth()]}/${date.getFullYear().toString().slice(2)}`;
+        }
+
+        // Update the createCalendar function
+        function createCalendar() {
+            const breathHolds = JSON.parse(localStorage.getItem('wimHofBreathHolds') || '[]');
+            const calendar = document.getElementById('calendar');
+            calendar.innerHTML = '';
+            
+            // Group sessions by date using actual timestamps
+            const sessionsByDate = new Map();
+            
+            // Process breath holds in groups of 3 (one session)
+            for (let i = 0; i < breathHolds.length; i += 3) {
+                const sessionHolds = breathHolds.slice(i, Math.min(i + 3, breathHolds.length));
+                
+                // Get timestamp from the first hold in the session
+                // Handle both old and new data formats
+                const timestamp = sessionHolds[0].timestamp || Date.now();  // Fallback to now for old data
+                const sessionDate = new Date(timestamp);
+                const dateKey = sessionDate.toISOString().split('T')[0];
+                
+                sessionsByDate.set(dateKey, (sessionsByDate.get(dateKey) || 0) + 1);
+            }
+            
+            // Create array of all months from earliest to current
+            const months = [];
+            const now = new Date();
+            let currentDate = new Date(now.getFullYear(), now.getMonth());
+            
+            // Find earliest date from actual session data
+            let earliestDate = new Date();
+            sessionsByDate.forEach((count, dateKey) => {
+                const sessionDate = new Date(dateKey);
+                if (sessionDate < earliestDate) {
+                    earliestDate = sessionDate;
+                }
+            });
+            
+            // Create month array from earliest to current
+            const startDate = new Date(earliestDate.getFullYear(), earliestDate.getMonth());
+            while (currentDate >= startDate) {
+                months.push({
+                    year: currentDate.getFullYear(),
+                    month: currentDate.getMonth()
+                });
+                currentDate.setMonth(currentDate.getMonth() - 1);
+            }
+            
+            // Create calendar for each month
+            months.forEach(({ year, month }) => {
+                const firstDay = new Date(year, month, 1);
+                const lastDay = new Date(year, month + 1, 0);
+                
+                const monthDiv = document.createElement('div');
+                monthDiv.className = 'month';
+                
+                // Add month title
+                const monthTitle = document.createElement('div');
+                monthTitle.className = 'month-title';
+                monthTitle.textContent = firstDay.toLocaleString('default', { month: 'long', year: 'numeric' });
+                monthDiv.appendChild(monthTitle);
+                
+                // Add weekday headers
+                const daysDiv = document.createElement('div');
+                daysDiv.className = 'days';
+                const weekdays = ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'];
+                weekdays.forEach(day => {
+                    const dayHeader = document.createElement('div');
+                    dayHeader.className = 'day-header';
+                    dayHeader.textContent = day;
+                    daysDiv.appendChild(dayHeader);
+                });
+                
+                // Adjust empty cells for Monday start
+                const firstDayIndex = firstDay.getDay() === 0 ? 6 : firstDay.getDay() - 1;
+                for (let i = 0; i < firstDayIndex; i++) {
+                    const emptyDay = document.createElement('div');
+                    emptyDay.className = 'day empty';
+                    daysDiv.appendChild(emptyDay);
+                }
+                
+                // Add all days of the month
+                for (let date = 1; date <= lastDay.getDate(); date++) {
+                    const dayDiv = document.createElement('div');
+                    dayDiv.className = 'day';
+                    
+                    const dateDiv = document.createElement('div');
+                    dateDiv.className = 'date';
+                    dateDiv.textContent = date;
+                    
+                    const dotsDiv = document.createElement('div');
+                    dotsDiv.className = 'dots';
+                    
+                    const dateKey = `${year}-${String(month + 1).padStart(2, '0')}-${String(date).padStart(2, '0')}`;
+                    const sessions = sessionsByDate.get(dateKey) || 0;
+                    
+                    for (let i = 0; i < sessions; i++) {
+                        const dot = document.createElement('div');
+                        dot.className = 'dot';
+                        dotsDiv.appendChild(dot);
+                    }
+                    
+                    dayDiv.appendChild(dateDiv);
+                    dayDiv.appendChild(dotsDiv);
+                    daysDiv.appendChild(dayDiv);
+                }
+                
+                monthDiv.appendChild(daysDiv);
+                calendar.appendChild(monthDiv);
+                
+                // Add spacing between months
+                if (months.indexOf({ year, month }) === 0) {
+                    const spacer = document.createElement('div');
+                    spacer.style.height = '20px';
+                    calendar.appendChild(spacer);
+                }
+            });
+        }
+
+        // Add automatic refresh of calendar at midnight
+        function setupCalendarRefresh() {
+            const now = new Date();
+            const tomorrow = new Date(now);
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            tomorrow.setHours(0, 0, 0, 0);
+            
+            const timeUntilMidnight = tomorrow - now;
+            
+            // Refresh at midnight
+            setTimeout(() => {
+                updateDisplay();
+                setupCalendarRefresh(); // Setup next day's refresh
+            }, timeUntilMidnight);
+        }
+
+        // Update the updateDisplay function to also update the calendar
+        function updateDisplay() {
+            const userLang = navigator.language.split('-')[0];
+            const t = translations[userLang] || translations.en;
+            
+            // Update page text
+            document.getElementById('title').textContent = t.title;
+            document.getElementById('headerMetric').textContent = t.headerMetric;
+            document.getElementById('headerValue').textContent = t.headerValue;
+            document.getElementById('backButton').textContent = "Back";
+
+            const stats = getStats();
+            const tbody = document.getElementById('statsBody');
+            tbody.innerHTML = '';
+
+            if (stats.record === 0 && stats.sessions === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="2" class="no-data">${t.noData}</td>
+                    </tr>`;
+                return;
+            }
+
+            const rows = [
+                [t.allTimeRecord, formatTime(stats.record)],
+                [t.averageHold, formatTime(stats.averageHold)],
+                [t.lastSession, formatTime(stats.lastSession)],
+                [t.monthSessions, stats.monthSessions],
+                [t.totalSessions, stats.sessions]
+            ];
+
+            rows.forEach(([metric, value]) => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${metric}</td>
+                    <td>${value}</td>
+                `;
+                tbody.appendChild(row);
+            });
+
+            // Add breath hold history
+            const breathHolds = JSON.parse(localStorage.getItem('wimHofBreathHolds') || '[]');
+            const breathHoldHistory = document.getElementById('breathHoldHistory');
+            
+            if (breathHolds.length > 0) {
+                // Format each session (3 holds)
+                const sessions = [];
+                for (let i = 0; i < breathHolds.length; i += 3) {
+                    const sessionHolds = breathHolds.slice(i, Math.min(i + 3, breathHolds.length));
+                    const formattedHolds = sessionHolds.map(hold => {
+                        const duration = typeof hold === 'number' ? hold : (hold.duration || 0);
+                        const minutes = Math.floor(duration / 60);
+                        const remainingSeconds = duration % 60;
+                        return minutes > 0 ? 
+                            `${minutes}:${remainingSeconds.toString().padStart(2, '0')}` : 
+                            duration;
+                    });
+                    sessions.push(`(${formattedHolds.join(', ')})`);
+                }
+                
+                // Group by month (for old format, assume recent dates)
+                const now = new Date();
+                const monthKey = formatMonth(now);
+                breathHoldHistory.innerHTML = `<strong>${monthKey}</strong>: ${sessions.join(' ')}`;
+            } else {
+                breathHoldHistory.textContent = 'No breath holds recorded yet';
+            }
+
+            // Update calendar
+            createCalendar();
+        }
+
+        // Initialize the page
+        updateDisplay();
+
+        // Call this after updateDisplay()
+        setupCalendarRefresh();
+    </script>
+</body>
+</html> 

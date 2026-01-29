@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Pusteøvelse / Breathing Exercise</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap');
+        
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+            margin: 0;
+            padding: 10px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333;
+        }
+
+        .container {
+            text-align: center;
+            background-color: rgba(255, 255, 255, 0.9);
+            padding: 15px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            width: 100%;
+            max-width: 320px;
+            margin-top: 10px;
+        }
+
+        h1 {
+            color: #4a5568;
+            margin: 0 0 5px;
+            font-size: 22px;
+        }
+
+        h2 {
+            color: #718096;
+            margin: 0 0 10px;
+            font-size: 14px;
+            font-weight: normal;
+        }
+
+        .phase {
+            margin-bottom: 8px;
+            padding: 8px;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+            background-color: #f7fafc;
+            font-size: 14px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .active {
+            background-color: #4299e1;
+            color: white;
+            box-shadow: 0 4px 6px rgba(66, 153, 225, 0.5);
+        }
+
+        #cycles {
+            margin: 10px 0;
+            font-weight: bold;
+            color: #4a5568;
+            font-size: 14px;
+            height: 20px;
+        }
+
+        button {
+            background-color: #48bb78;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 50px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            outline: none;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            touch-action: manipulation;
+        }
+
+        button:hover, button:active {
+            background-color: #38a169;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px rgba(72, 187, 120, 0.4);
+        }
+
+        button.stop {
+            background-color: #f56565;
+        }
+
+        button.stop:hover, button.stop:active {
+            background-color: #e53e3e;
+            box-shadow: 0 4px 6px rgba(245, 101, 101, 0.4);
+        }
+
+        .progress-ring {
+            position: relative;
+            width: 100px;
+            height: 100px;
+            margin: 10px auto;
+        }
+
+        .progress-ring__circle {
+            transform: rotate(-90deg);
+            transform-origin: 50% 50%;
+            transition: stroke-dashoffset 0.35s;
+        }
+
+        .time-left {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 24px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 id="title">Pusteøvelse</h1>
+        <h2 id="subtitle">Gjøres to ganger om dagen</h2>
+        <div class="progress-ring">
+            <svg class="progress-ring__circle" width="100" height="100">
+                <circle stroke="#e2e8f0" stroke-width="8" fill="transparent" r="42" cx="50" cy="50"/>
+                <circle id="progress-circle" stroke="#4299e1" stroke-width="8" fill="transparent" r="42" cx="50" cy="50"/>
+            </svg>
+            <div class="time-left" id="timeLeft"></div>
+        </div>
+        <div id="phase1" class="phase"></div>
+        <div id="phase2" class="phase"></div>
+        <div id="phase3" class="phase"></div>
+        <div id="cycles"></div>
+        <button id="startStop">Start</button>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const translations = {
+    'nb': {
+        title: 'Pusteøvelse',
+        subtitle: 'Gjøres to ganger om dagen',
+        phase1: 'Pust inn med nesen',
+        phase2: 'Hold pusten',
+        phase3: 'Pust ut med munnen',
+        cycles: 'Fullførte sykluser',
+        start: 'Start',
+        stop: 'Stopp',
+        seconds: 'sekunder'
+    },
+    'en': {
+        title: 'Breathing Exercise',
+        subtitle: '2x a day',
+        phase1: 'Breathe in through your nose',
+        phase2: 'Hold your breath',
+        phase3: 'Breathe out through your mouth',
+        cycles: 'Completed cycles',
+        start: 'Start',
+        stop: 'Stop',
+        seconds: 'seconds'
+    },
+    'zh': {
+        title: '呼吸练习',
+        subtitle: '每天做两次',
+        phase1: '通过鼻子吸气',
+        phase2: '屏住呼吸',
+        phase3: '从嘴巴呼气',
+        cycles: '已完成周期',
+        start: '开始',
+        stop: '停止',
+        seconds: '秒'
+    },
+    'es': {
+        title: 'Ejercicio de Respiración',
+        subtitle: 'Hazlo dos veces al día',
+        phase1: 'Inhala por la nariz',
+        phase2: 'Mantén la respiración',
+        phase3: 'Exhala por la boca',
+        cycles: 'Ciclos completados',
+        start: 'Comenzar',
+        stop: 'Detener',
+        seconds: 'segundos'
+    },
+    'hi': {
+        title: 'श्वास व्यायाम',
+        subtitle: 'इसे दिन में दो बार करें',
+        phase1: 'नाक से सांस अंदर लें',
+        phase2: 'सांस रोक कर रखें',
+        phase3: 'मुंह से सांस बाहर छोड़ें',
+        cycles: 'पूरे किए गए चक्र',
+        start: 'शुरू करें',
+        stop: 'रोकें',
+        seconds: 'सेकंड'
+    },
+    'ar': {
+        title: 'تمرين التنفس',
+        subtitle: 'قم به مرتين في اليوم',
+        phase1: 'تنفس من خلال أنفك',
+        phase2: 'احبس نفسك',
+        phase3: 'أخرج النفس من فمك',
+        cycles: 'الدورات المكتملة',
+        start: 'ابدأ',
+        stop: 'توقف',
+        seconds: 'ثوان'
+    },
+    'pt': {
+        title: 'Exercício de Respiração',
+        subtitle: 'Faça duas vezes por dia',
+        phase1: 'Inspire pelo nariz',
+        phase2: 'Prenda a respiração',
+        phase3: 'Expire pela boca',
+        cycles: 'Ciclos completos',
+        start: 'Iniciar',
+        stop: 'Parar',
+        seconds: 'segundos'
+    },
+    'bn': {
+        title: 'শ্বাস ব্যায়াম',
+        subtitle: 'দিনে দুইবার করুন',
+        phase1: 'নাক দিয়ে শ্বাস নিন',
+        phase2: 'শ্বাস ধরে রাখুন',
+        phase3: 'মুখ দিয়ে শ্বাস ছাড়ুন',
+        cycles: 'সম্পূর্ণ চক্র',
+        start: 'শুরু',
+        stop: 'থামুন',
+        seconds: 'সেকেন্ড'
+    },
+    'ru': {
+        title: 'Дыхательное упражнение',
+        subtitle: 'Выполняйте дважды в день',
+        phase1: 'Вдохните через нос',
+        phase2: 'Задержите дыхание',
+        phase3: 'Выдохните через рот',
+        cycles: 'Завершенные циклы',
+        start: 'Начать',
+        stop: 'Остановить',
+        seconds: 'секунд'
+    },
+    'ja': {
+        title: '呼吸エクササイズ',
+        subtitle: '1日2回行いましょう',
+        phase1: '鼻から息を吸い込む',
+        phase2: '息を止める',
+        phase3: '口から息を吐き出す',
+        cycles: '完了したサイクル',
+        start: '開始',
+        stop: '停止',
+        seconds: '秒'
+    },
+    'de': {
+        title: 'Atemübung',
+        subtitle: 'Zweimal täglich durchführen',
+        phase1: 'Durch die Nase einatmen',
+        phase2: 'Atem anhalten',
+        phase3: 'Durch den Mund ausatmen',
+        cycles: 'Abgeschlossene Zyklen',
+        start: 'Start',
+        stop: 'Stopp',
+        seconds: 'Sekunden'
+    },
+    'fr': {
+        title: 'Exercice de Respiration',
+        subtitle: 'À faire deux fois par jour',
+        phase1: 'Inspirez par le nez',
+        phase2: 'Retenez votre souffle',
+        phase3: 'Expirez par la bouche',
+        cycles: 'Cycles terminés',
+        start: 'Commencer',
+        stop: 'Arrêter',
+        seconds: 'secondes'
+    },
+    'tr': {
+        title: 'Nefes Egzersizi',
+        subtitle: 'Günde iki kez yapın',
+        phase1: 'Burnunuzdan nefes alın',
+        phase2: 'Nefesinizi tutun',
+        phase3: 'Ağzınızdan nefes verin',
+        cycles: 'Tamamlanan döngüler',
+        start: 'Başla',
+        stop: 'Dur',
+        seconds: 'saniye'
+    },
+    'it': {
+        title: 'Esercizio di Respirazione',
+        subtitle: 'Fallo due volte al giorno',
+        phase1: 'Inspira dal naso',
+        phase2: 'Trattieni il respiro',
+        phase3: 'Espira dalla bocca',
+        cycles: 'Cicli completati',
+        start: 'Inizia',
+        stop: 'Ferma',
+        seconds: 'secondi'
+    },
+    'ko': {
+        title: '호흡 운동',
+        subtitle: '하루에 두 번 하세요',
+        phase1: '코로 숨을 들이쉬세요',
+        phase2: '숨을 참으세요',
+        phase3: '입으로 숨을 내쉬세요',
+        cycles: '완료된 주기',
+        start: '시작',
+        stop: '정지',
+        seconds: '초'
+    },
+    'vi': {
+        title: 'Bài tập Hít thở',
+        subtitle: 'Thực hiện hai lần mỗi ngày',
+        phase1: 'Hít vào qua mũi',
+        phase2: 'Giữ hơi thở',
+        phase3: 'Thở ra qua miệng',
+        cycles: 'Chu kỳ đã hoàn thành',
+        start: 'Bắt đầu',
+        stop: 'Dừng lại',
+        seconds: 'giây'
+    },
+    'pl': {
+        title: 'Ćwiczenie Oddechowe',
+        subtitle: 'Wykonuj dwa razy dziennie',
+        phase1: 'Wdychaj przez nos',
+        phase2: 'Wstrzymaj oddech',
+        phase3: 'Wydychaj przez usta',
+        cycles: 'Ukończone cykle',
+        start: 'Start',
+        stop: 'Stop',
+        seconds: 'sekund'
+    },
+    'uk': {
+        title: 'Дихальна вправа',
+        subtitle: 'Виконуйте двічі на день',
+        phase1: 'Вдихніть через ніс',
+        phase2: 'Затримайте дихання',
+        phase3: 'Видихніть через рот',
+        cycles: 'Завершені цикли',
+        start: 'Почати',
+        stop: 'Зупинити',
+        seconds: 'секунд'
+    },
+    'nl': {
+        title: 'Ademhalingsoefening',
+        subtitle: 'Doe het tweemaal per dag',
+        phase1: 'Adem in door je neus',
+        phase2: 'Houd je adem in',
+        phase3: 'Adem uit door je mond',
+        cycles: 'Voltooide cycli',
+        start: 'Start',
+        stop: 'Stop',
+        seconds: 'seconden'
+    },
+    'th': {
+        title: 'แบบฝึกหัดการหายใจ',
+        subtitle: 'ทำวันละสองครั้ง',
+        phase1: 'หายใจเข้าทางจมูก',
+        phase2: 'กลั้นหายใจ',
+        phase3: 'หายใจออกทางปาก',
+        cycles: 'รอบที่เสร็จสมบูรณ์',
+        start: 'เริ่ม',
+        stop: 'หยุด',
+        seconds: 'วินาที'
+    },
+    'sv': {
+        title: 'Andningsövning',
+        subtitle: 'Gör det två gånger om dagen',
+        phase1: 'Andas in genom näsan',
+        phase2: 'Håll andan',
+        phase3: 'Andas ut genom munnen',
+        cycles: 'Avslutade cykler',
+        start: 'Starta',
+        stop: 'Stoppa',
+        seconds: 'sekunder'
+    },
+    'id': {
+        title: 'Latihan Pernapasan',
+        subtitle: 'Lakukan dua kali sehari',
+        phase1: 'Tarik napas melalui hidung',
+        phase2: 'Tahan napas',
+        phase3: 'Hembuskan napas melalui mulut',
+        cycles: 'Siklus selesai',
+        start: 'Mulai',
+        stop: 'Berhenti',
+        seconds: 'detik'
+    },
+    'ro': {
+        title: 'Exercițiu de Respirație',
+        subtitle: 'Fă-l de două ori pe zi',
+        phase1: 'Inspiră pe nas',
+        phase2: 'Ține respirația',
+        phase3: 'Expiră pe gură',
+        cycles: 'Cicluri completate',
+        start: 'Start',
+        stop: 'Stop',
+        seconds: 'secunde'
+    }
+};
+
+            const userLanguage = navigator.language.split('-')[0];
+            const lang = translations[userLanguage] ? userLanguage : 'en';
+
+
+            document.getElementById('title').textContent = translations[lang].title;
+            document.getElementById('subtitle').textContent = translations[lang].subtitle;
+
+            const phases = [
+                { name: translations[lang].phase1, duration: 4, element: document.getElementById('phase1'), countUp: true },
+                { name: translations[lang].phase2, duration: 7, element: document.getElementById('phase2'), countUp: false },
+                { name: translations[lang].phase3, duration: 8, element: document.getElementById('phase3'), countUp: false }
+            ];
+
+            let currentPhase = 0;
+            let timeLeft = 0;
+            let cyclesCompleted = 0;
+            let isActive = false;
+            let lastTime = 0;
+            let accumulatedTime = 0;
+
+            const startStopButton = document.getElementById('startStop');
+            const cyclesElement = document.getElementById('cycles');
+            const timeLeftElement = document.getElementById('timeLeft');
+            const progressCircle = document.getElementById('progress-circle');
+            const circumference = 2 * Math.PI * 42;
+
+            progressCircle.style.strokeDasharray = `${circumference} ${circumference}`;
+            progressCircle.style.strokeDashoffset = circumference;
+
+            function setProgress(percent) {
+                const offset = circumference - (percent / 100 * circumference);
+                progressCircle.style.strokeDashoffset = offset;
+            }
+
+            function updateDisplay() {
+                phases.forEach((phase, index) => {
+                    phase.element.classList.toggle('active', index === currentPhase && isActive);
+                    phase.element.textContent = `${phase.name}: ${phase.duration} ${translations[lang].seconds}`;
+                });
+                cyclesElement.textContent = `${translations[lang].cycles}: ${cyclesCompleted} / 4`;
+                startStopButton.textContent = isActive ? translations[lang].stop : translations[lang].start;
+                startStopButton.classList.toggle('stop', isActive);
+                
+                if (isActive) {
+                    const currentPhaseObj = phases[currentPhase];
+                    const displayTime = currentPhaseObj.countUp ? currentPhaseObj.duration - timeLeft : timeLeft;
+                    timeLeftElement.textContent = displayTime;
+                    
+                    const progress = ((currentPhaseObj.duration - timeLeft) / currentPhaseObj.duration) * 100;
+                    setProgress(progress);
+                } else {
+                    timeLeftElement.textContent = '';
+                    setProgress(0);
+                }
+            }
+
+            function nextPhase() {
+                currentPhase = (currentPhase + 1) % phases.length;
+                if (currentPhase === 0) {
+                    cyclesCompleted++;
+                    if (cyclesCompleted >= 4) {
+                        stopExercise();
+                        return;
+                    }
+                }
+                timeLeft = phases[currentPhase].duration;
+                accumulatedTime = 0;
+            }
+
+            function tick(currentTime) {
+                if (!isActive) return;
+                
+                if (lastTime === 0) {
+                    lastTime = currentTime;
+                }
+
+                const deltaTime = currentTime - lastTime;
+                accumulatedTime += deltaTime;
+
+                if (accumulatedTime >= 1000) {
+                    timeLeft--;
+                    accumulatedTime -= 1000;
+                    if (timeLeft < 0) {
+                        nextPhase();
+                    }
+                    updateDisplay();
+                }
+
+                lastTime = currentTime;
+                requestAnimationFrame(tick);
+            }
+
+            function startExercise() {
+                isActive = true;
+                currentPhase = 0;
+                cyclesCompleted = 0;
+                timeLeft = phases[currentPhase].duration;
+                lastTime = 0;
+                accumulatedTime = 0;
+                updateDisplay();
+                requestAnimationFrame(tick);
+            }
+
+            function stopExercise() {
+                isActive = false;
+                currentPhase = 0;
+                cyclesCompleted = 0;
+                lastTime = 0;
+                accumulatedTime = 0;
+                updateDisplay();
+            }
+
+            startStopButton.addEventListener('click', function() {
+                if (isActive) {
+                    stopExercise();
+                } else {
+                    startExercise();
+                }
+            });
+
+            updateDisplay();
+        });
+    </script>
+</body>
+</html>

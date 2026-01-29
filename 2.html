@@ -1,0 +1,773 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Wim Hof Breathing Method</title>
+     <style>
+        * {
+            -webkit-tap-highlight-color: transparent;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            user-select: none;
+            box-sizing: border-box;
+        }
+        body, html {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            width: 100%;
+            background: linear-gradient(135deg, rgb(102, 126, 234) 0%, rgb(118, 75, 162) 100%);
+            background-attachment: fixed;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            align-items: center;
+            overflow-x: hidden;
+            overflow-y: auto;
+        }
+        .card {
+            background-color: rgba(255, 255, 255, 0.9);
+            border-radius: 20px;
+            box-shadow: rgba(0, 0, 0, 0.2) 0px 10px 30px 0px;
+            color: rgb(51, 51, 51);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            width: 90%;
+            max-width: 320px;
+            padding: 15px;
+            text-align: center;
+            margin-top: 20px;
+            margin-bottom: 20px;
+            overflow-y: auto;
+            max-height: calc(100vh - 40px);
+        }
+        h2 {
+            margin: 0;
+            font-size: 20px;
+            font-weight: bold;
+        }
+        .subtitle {
+            margin-top: 3px;
+            color: #666;
+            font-size: 12px;
+        }
+        .circle {
+            width: 100px;
+            height: 100px;
+            border: 6px solid rgba(230, 230, 235, 0.8);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 10px auto;
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #4a4a4a;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
+        }
+        @keyframes blinkingEffect {
+            0% { background-color: transparent; }
+            50% { background-color: rgba(72, 187, 120, 0.5); }
+            100% { background-color: transparent; }
+        }
+        .circle.blinking {
+            animation: blinkingEffect 2s infinite;
+        }
+        .instruction-cards {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin: 10px 0;
+        }
+        .instruction-card {
+            padding: 10px;
+            border-radius: 8px;
+            background-color: #ffffff;
+            font-size: 13px;
+            text-align: left;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            border: 1px solid #e0e0e0;
+        }
+        .instruction-card.active {
+            background-color: #4a90e2;
+            color: white;
+            transform: scale(1.02);
+            border: none;
+            animation: cardPulse 1s ease-out;
+        }
+        .completed-rounds {
+            font-size: 14px;
+            color: #4a4a4a;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+        #actionButton {
+            background-color: rgb(72, 187, 120);
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            width: 100%;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: background-color 0.1s, transform 0.1s;
+            touch-action: manipulation;
+            visibility: visible;
+            height: 44px;
+            margin-bottom: 0;
+        }
+        #actionButton:active {
+            background-color: rgb(62, 177, 110);
+            transform: scale(0.98);
+        }
+        #record {
+            padding: 12px;
+            margin: -4px;  /* Compensate for padding to keep layout */
+            border-radius: 8px;
+            background-color: rgba(255, 255, 255, 0.1);
+            transition: background-color 0.2s;
+        }
+        #record:active {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+        #record::after {
+            content: " 📊";
+            font-size: 0.9em;
+            opacity: 0.8;
+            margin-left: 4px;
+        }
+        @keyframes cardPulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.03); }
+            100% { transform: scale(1.02); }
+        }
+        .circle.hidden {
+            border: none;  /* Hide the circle border */
+            box-shadow: none;  /* Remove shadow */
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <div>
+            <h2 id="title"></h2>
+            <p class="subtitle" id="subtitle"></p>
+            <p class="subtitle" id="record"></p>
+        </div>
+        <div class="circle" id="counter"></div>
+        <div class="instruction-cards">
+            <div class="instruction-card" id="cardBreathing"></div>
+            <div class="instruction-card" id="cardRetention"></div>
+            <div class="instruction-card" id="cardRecovery"></div>
+        </div>
+        <p class="completed-rounds" id="completedRounds"></p>
+        <button id="actionButton"></button>
+    </div>
+
+    <script>
+        const translations = {
+            en: {
+                title: "Wim Hof Breathing Method",
+                subtitle: "2x a day",
+                breathing: "Breathe in quickly through the nose, out through the mouth: 30 times",
+                retention: "Exhale and hold your breath for as long as you can",
+                recovery: "Take a deep breath and hold for 15 seconds",
+                completedRounds: "Round: {0} of 3",
+                startRound: "Start Round {0}",
+                registerBreath: "Register Breath",
+                endRetention: "End Retention",
+                endRecovery: "End Recovery",
+                restart: "Start Again",
+                lastRound: "Last round",
+                allTimeRecord: "All-time record",
+                startRoundOf: "Start Round {0}",
+                clickForStats: "Click to view detailed statistics"
+            },
+            nb: {
+                title: "Wim Hof pustemetode",
+                subtitle: "2x om dagen",
+                breathing: "Pust raskt inn med nese, og raskt ut med munn: 30 ganger",
+                retention: "Pust ut og hold pusten så lenge du klarer",
+                recovery: "Ta et dypt åndedrag og hold i 15 sekunder",
+                completedRounds: "Runde: {0} av 3",
+                startRound: "Start runde {0}",
+                registerBreath: "Registrer Pust",
+                endRetention: "Avslutt Pustehold",
+                endRecovery: "Avslutt Restitusjon",
+                restart: "Start På Nytt",
+                lastRound: "Siste runde",
+                allTimeRecord: "Rekord",
+                startRoundOf: "Start runde {0}",
+                clickForStats: "Klikk for å se detaljert statistikk"
+            },
+            es: {
+                title: "Método de respiración Wim Hof",
+                subtitle: "Haz dos veces al día",
+                breathing: "Inhala rápidamente por la nariz, exhala por la boca: 30 veces",
+                retention: "Exhala y aguanta la respiración todo lo que puedas",
+                recovery: "Toma una respiración profunda y aguanta durante 15 segundos",
+                completedRounds: "Rondas completadas: {0} de 3",
+                startRound: "Iniciar Ronda {0}",
+                registerBreath: "Registrar Respiración",
+                endRetention: "Finalizar Retención",
+                endRecovery: "Finalizar Recuperación",
+                restart: "Comenzar de Nuevo",
+                lastRound: "Última ronda",
+                allTimeRecord: "Récord histórico",
+                startRoundOf: "Iniciar Ronda {0}",
+                clickForStats: "Click to view detailed statistics"
+            },
+            zh: {
+                title: "Wim Hof呼吸法",
+                subtitle: "每天做两次",
+                breathing: "通过鼻子快速吸气，通过嘴巴呼气：30次",
+                retention: "呼气并尽可能长时间地屏住吸",
+                recovery: "深呼吸并保持15秒",
+                completedRounds: "已完成回：{0}/3",
+                startRound: "开始第{0}回合",
+                registerBreath: "记录呼吸",
+                endRetention: "结束屏息",
+                endRecovery: "结束恢复",
+                restart: "重新开始",
+                lastRound: "上一轮",
+                allTimeRecord: "历史最佳",
+                startRoundOf: "开始第{0}轮",
+                clickForStats: "点击查��详细统计"
+            },
+            hi: {
+                title: "विम होफ़ श्वास पद्धति",
+                subtitle: "दिन में दो बार करें",
+                breathing: "नाक से तेजी से सांस लें, मुंह से बाहर निकालें: 30 बार",
+                retention: "सांस छोड़ें औ जितनी द तक हो सके संस रोकें",
+                recovery: "एक गहरी सांस लें और 15 सेकंड तक रोकें",
+                completedRounds: "पूरे किए गए राउंड: {0} / 3",
+                startRound: "राउंड {0} शुरू करें",
+                registerBreath: "सांस दर्ज करें",
+                endRetention: "सांस छोड़ना समाप्त करें",
+                endRecovery: "रिकवरी समाप्त करें",
+                restart: "फिर से शुरू करें",
+                lastRound: "पिछला राउंड",
+                allTimeRecord: "सर्वश्रेष्ठ रिकॉर्ड",
+                startRoundOf: "राउंड {0} शुर करें",
+                clickForStats: "Click to view detailed statistics"
+            },
+            ar: {
+                title: "طريقة ويم هوف للتنفس",
+                subtitle: "قم بها مرتين في اليوم",
+                breathing: "تنس بسرعة من خلال الأنف، وأخرج من الفم: 30 مر",
+                retention: "أخرج الهوء واحبس نفسك لأطول فتاة ممكنة",
+                recovery: "خذ نفسًا عميقًا واحتفظ به لمدة 15 ثانية",
+                completedRounds: "الجولات المكتملة: {0} من 3",
+                startRound: "ابدأ الجولة {0}",
+                registerBreath: "سجل النفس",
+                endRetention: "إنهاء الاحتفاظ",
+                endRecovery: "إنهاء الاسترداد",
+                restart: "ابدأ من جديد",
+                lastRound: "الجولة الأخيرة",
+                allTimeRecord: "أفضل رقم قياسي",
+                startRoundOf: "بدء الجولة {0}",
+                clickForStats: "Click to view detailed statistics"
+            },
+            pt: {
+                title: "Método de Respiraão Wim Hof",
+                subtitle: "Faça duas vezes por dia",
+                breathing: "Inspire rapidamente pelo nariz, expire pela boca: 30 vezes",
+                retention: "Expire e segure a respiração o máximo que puder",
+                recovery: "Faça uma respiração profunda e segure por 15 segundos",
+                completedRounds: "Rodadas completas: {0} de 3",
+                startRound: "Iniciar Rodada {0}",
+                registerBreath: "Registrar Respiração",
+                endRetention: "Finalizar Retenção",
+                endRecovery: "Finalizar Recuperação",
+                restart: "Recomeçar",
+                lastRound: "Última rodada",
+                allTimeRecord: "Recorde histórico",
+                startRoundOf: "Iniciar Rodada {0}",
+                clickForStats: "Click to view detailed statistics"
+            },
+            ru: {
+                title: "Метод дыхания Вим Хофа",
+                subtitle: "Выполняйте дважды в день",
+                breathing: "Быстро вдохните через нос, выдохните через рот: 30 раз",
+                retention: "Выдохните и задержите дхание как можно дольше",
+                recovery: "Сделате глубокий вдох и задержите на 15 секнд",
+                completedRounds: "Завершено раундов: {0} из 3",
+                startRound: "Начать раунд {0}",
+                registerBreath: "Зарегистрировать вдох",
+                endRetention: "Завершить задержку",
+                endRecovery: "Завершить восстановлеие",
+                restart: "Начать заново",
+                lastRound: "Последний раунд",
+                allTimeRecord: "Рекорд",
+                startRoundOf: "Начать раунд {0}",
+                clickForStats: "Click to view detailed statistics"
+            },
+            ja: {
+                title: "ウィム・ホフ呼吸",
+                subtitle: "1日2回行う",
+                breathing: "鼻から素早く吸い、口から吐き出す：30回",
+                retention: "息を吐き出し、できるだけ長く息止める",
+                recovery: "深呼吸をして15秒間保持する",
+                completedRounds: "完了したラウンド：{0} / 3",
+                startRound: "ラウンド{0}を開始",
+                registerBreath: "呼吸を記録",
+                endRetention: "息止めを終了",
+                endRecovery: "回復を了",
+                restart: "再開",
+                lastRound: "前回",
+                allTimeRecord: "最高記録",
+                startRoundOf: "ラウンド{0}を開始",
+                clickForStats: "Click to view detailed statistics"
+            },
+            de: {
+                title: "Wim-Hof-Atemmethode",
+                subtitle: "Zweimal täglich durchführen",
+                breathing: "Atmen Sie schnell durch die Nase ein und durch den Mund aus: 30 Mal",
+                retention: "Atmen Sie aus und halten Sie den Atem so lange wie möglich an",
+                recovery: "Nehmen Sie einen tiefen Atemzug und halten Sie ihn 15 Sekunden lang",
+                completedRounds: "Abgeschlossene Runden: {0} von 3",
+                startRound: "Runde {0} starten",
+                registerBreath: "Atem registrieren",
+                endRetention: "Atemanhalten beenden",
+                endRecovery: "Erholung beenden",
+                restart: "Neu starten",
+                lastRound: "Letzte Runde",
+                allTimeRecord: "Bestleistung",
+                startRoundOf: "Runde {0} starten",
+                clickForStats: "Click to view detailed statistics"
+            },
+            fr: {
+                title: "Méthode de respiration Wim Hof",
+                subtitle: "À faire deux fois par jour",
+                breathing: "Inspirez rapidement par le nez, expirez par la bouche : 30 fois",
+                retention: "Expirez et retenez votre respiration aussi longtemps que possible",
+                recovery: "Prenez une profonde inspiration et retenez-la pendant 15 secondes",
+                completedRounds: "Séries terminées : {0} sur 3",
+                startRound: "Commencer la série {0}",
+                registerBreath: "Enregistrer la respiration",
+                endRetention: "Terminer la rétention",
+                endRecovery: "Terminer la récupération",
+                restart: "Recommencer",
+                lastRound: "Dernier tour",
+                allTimeRecord: "Record absolu",
+                startRoundOf: "Commencer la série {0}",
+                clickForStats: "Click to view detailed statistics"
+            },
+            ko: {
+                title: "윔 호프 흡법",
+                subtitle: "하루에 두 번 실시",
+                breathing: "코로 빠르게 들이마시고 입으로 내쉬기: 30회",
+                retention: "숨을 내쉬고 가능한 한 오래 참기",
+                recovery: "깊게 숨을 들이마시고 15초 동안 지",
+                completedRounds: "완료된 라운드: {0} / 3",
+                startRound: "라운드 {0} 시",
+                registerBreath: "호흡 등록",
+                endRetention: "호흡 참기 종료",
+                endRecovery: "회복 종료",
+                restart: "다시 시작",
+                lastRound: "마지막 라운드",
+                allTimeRecord: "최고 기록",
+                startRoundOf: "라운드 {0} 시작",
+                clickForStats: "Click to view detailed statistics"
+            },
+            it: {
+                title: "Metodo di respirazione Wim Hof",
+                subtitle: "Da fare due volte al giorno",
+                breathing: "Inspira rapidamente dal naso, espira dalla bocca: 30 volte",
+                retention: "Espira e trattieni il respiro il più a lungo possibile",
+                recovery: "Fai un respiro profondo e trattieni per 15 secondi",
+                completedRounds: "Round completati: {0} di 3",
+                startRound: "Inizia Round {0}",
+                registerBreath: "Registra Respiro",
+                endRetention: "Termina Ritenzione",
+                endRecovery: "Termina Recupero",
+                restart: "Ricomincia",
+                lastRound: "Ultimo round",
+                allTimeRecord: "Record assoluto",
+                startRoundOf: "Inizia Round {0}",
+                clickForStats: "Click to view detailed statistics"
+            },
+            tr: {
+                title: "Wim Hof Nefes Yöntemi",
+                subtitle: "Günde iki kez yapın",
+                breathing: "Burundan hızlıca nefes alın, ağızdan verin: 30 kez",
+                retention: "Nefes verin ve nefesinizi mümkün olduğunca uzun süre tutun",
+                recovery: "Derin bir nefes alın ve 15 saniye tutun",
+                completedRounds: "Tamamlanan turlar: {0} / 3",
+                startRound: "Tur {0}'ı Başlat",
+                registerBreath: "Nefesi Kaydet",
+                endRetention: "Tutmayı Bitir",
+                endRecovery: "İyileşmeyi Bitir",
+                restart: "Yeniden Başla",
+                lastRound: "Son tur",
+                allTimeRecord: "Tüm zamanların rekoru",
+                startRoundOf: "Tur {0}'ı Başlat",
+                clickForStats: "Click to view detailed statistics"
+            },
+            vi: {
+                title: "Phương pháp hô hấp Wim Hof",
+                subtitle: "Thực hiện hai lần mỗi ngày",
+                breathing: "Hít vào nhanh qua mũi, thở ra qua miệng: 30 lần",
+                retention: "Thở ra và giữ hơi thở càng lâu càng tốt",
+                recovery: "Hít một hơi sâu và giữ trong 15 giây",
+                completedRounds: "Số vòng đã hoàn thành: {0} / 3",
+                startRound: "Bắt đầu Vòng {0}",
+                registerBreath: "Ghi nhận Hơi thở",
+                endRetention: "Kết thúc Giữ hơi",
+                endRecovery: "Kết thúc Hồi phục",
+                restart: "Bắt đầu lại",
+                lastRound: "Vòng cuối",
+                allTimeRecord: "Kỷ lục",
+                startRoundOf: "Bắt đầu Vòng {0}",
+                clickForStats: "Click to view detailed statistics"
+            },
+            pl: {
+                title: "Metoda oddychania Wim Hofa",
+                subtitle: "Wykonuj dwa razy dziennie",
+                breathing: "Wdychaj szybko przez nos, wydychaj przez usta: 30 razy",
+                retention: "Wydychaj i wstrzymaj oddech tak długo, jak potrafisz",
+                recovery: "Weź głęboki wdech i wstrzymaj przez 15 sekund",
+                completedRounds: "Ukończone rundy: {0} z 3",
+                startRound: "Rozpocznij Rundę {0}",
+                registerBreath: "Zarejestruj Oddech",
+                endRetention: "Zakończ Wstrzymanie",
+                endRecovery: "Zakończ Regenerację",
+                restart: "Rozpocznij Ponownie",
+                lastRound: "Ostatnia runda",
+                allTimeRecord: "Rekord wszech czasów",
+                startRoundOf: "Rozpocznij Rundę {0}",
+                clickForStats: "Click to view detailed statistics"
+            },
+            uk: {
+                title: "Метод дихання Віма Хофа",
+                subtitle: "Виконуйте двічі на день",
+                breathing: "Швидко вдихніть черз ніс, видихніть через рот: 30 разів",
+                retention: "Відкрийте рот і затримайті дихання я�� довго, як зможете",
+                recovery: "Вдихніть глибоко і затримайте на 15 секнд",
+                completedRounds: "Завершено раундів: {0} з 3",
+                startRound: "Почати раунд {0}",
+                registerBreath: "Зареєструвати вдих",
+                endRetention: "Завершити затримку",
+                endRecovery: "Завершити відновлення",
+                restart: "Почати заново",
+                lastRound: "Останній раунд",
+                allTimeRecord: "Рекорд",
+                startRoundOf: "Почати раунд {0}",
+                clickForStats: "Click to view detailed statistics"
+            }
+            // Add more languages here...
+        };    
+
+        // Check if we've already done the migration
+        if (!localStorage.getItem('dataMigrationDone')) {
+            // Store the record before clearing
+            const oldRecord = localStorage.getItem('wimHofRecord');
+            
+            // Clear all data
+            localStorage.clear();
+            
+            // Restore the record if it existed
+            if (oldRecord) {
+                localStorage.setItem('wimHofRecord', oldRecord);
+            }
+            
+            // Mark migration as done
+            localStorage.setItem('dataMigrationDone', 'true');
+        }
+
+        function getBrowserLanguage() {
+            return navigator.language.split('-')[0];
+        }
+
+        // Set language, default to English if not supported
+        const lang = translations[getBrowserLanguage()] ? getBrowserLanguage() : 'en';
+        const t = translations[lang];
+
+        // Update all text content
+        document.getElementById('title').textContent = t.title;
+        document.getElementById('subtitle').textContent = t.subtitle;
+        document.getElementById('cardBreathing').textContent = t.breathing;
+        document.getElementById('cardRetention').textContent = t.retention;
+        document.getElementById('cardRecovery').textContent = t.recovery;
+
+        const counter = document.getElementById('counter');
+        const completedRounds = document.getElementById('completedRounds');
+        const actionButton = document.getElementById('actionButton');
+        const cardBreathing = document.getElementById('cardBreathing');
+        const cardRetention = document.getElementById('cardRetention');
+        const cardRecovery = document.getElementById('cardRecovery');
+
+        let phase = 'idle';
+        let round = 1;
+        let timer = 0;
+        let breathCount = 0;
+        let completedRoundsCount = 0;
+        let intervalId;
+        let breathHoldStart = 0;
+        let currentHoldTime = 0;
+        let lastHoldTime = 0;
+        let recordHoldTime = parseInt(localStorage.getItem('wimHofRecord')) || 0;
+        let sessionsCount = parseInt(localStorage.getItem('wimHofSessions')) || 0;
+        let sessionStartTime = 0;
+        let isTransitioning = false;
+        let cooldownActive = false;
+
+        // First add a helper function to format seconds into minutes and seconds
+        function formatTime(seconds) {
+            const minutes = Math.floor(seconds / 60);
+            const remainingSeconds = seconds % 60;
+            return `${minutes}m${remainingSeconds.toString().padStart(2, '0')}s`;
+        }
+
+        // Then modify the updateDisplay function to show both times
+        function updateDisplay() {
+            if (phase === 'breathing') {
+                counter.textContent = 30 - breathCount;
+                const progress = Math.round((breathCount / 30) * 100);
+                counter.style.opacity = 0.5 + (progress / 200);
+            } else if (phase === 'retention') {
+                const time = timer >= 60 ? 
+                    `${Math.floor(timer / 60)}:${(timer % 60).toString().padStart(2, '0')}` : 
+                    timer;
+                counter.textContent = time;
+                counter.style.fontSize = timer >= 60 ? '2.2rem' : '1.8rem';
+                counter.style.fontWeight = 'bold';
+                counter.style.color = '#4a4a4a';
+            } else if (phase === 'recovery') {
+                const remainingTime = 15 - timer;
+                counter.textContent = timer >= 15 ? '✔️' : remainingTime;
+                if (timer >= 15) {
+                    counter.style.fontSize = '48px';
+                } else {
+                    counter.style.fontSize = '';
+                    // Add the same fade effect as breathing phase
+                    const progress = Math.round((timer / 15) * 100);
+                    counter.style.opacity = 0.5 + (progress / 200);
+                }
+            } else if (phase === 'completed') {
+                const breathHolds = JSON.parse(localStorage.getItem('wimHofBreathHolds') || '[]');
+                const lastThreeHolds = breathHolds.slice(-3);
+                counter.classList.add('hidden');  // Hide circle border
+                
+                const formattedHolds = lastThreeHolds.map(hold => {
+                    const duration = typeof hold === 'number' ? hold : hold.duration;
+                    if (duration >= 60) {
+                        const minutes = Math.floor(duration / 60);
+                        const seconds = duration % 60;
+                        return `${minutes}m${seconds.toString().padStart(2, '0')}s`;
+                    }
+                    return `${duration}s`;
+                });
+                
+                counter.textContent = formattedHolds.join(' - ');
+                counter.style.fontSize = '1.5rem';
+                counter.style.fontWeight = 'bold';
+                counter.style.whiteSpace = 'nowrap';  // Prevent line breaks
+            } else {
+                counter.classList.remove('hidden');
+                counter.textContent = '';
+                counter.style.fontSize = '';
+                counter.style.whiteSpace = '';  // Reset white-space
+            }
+
+            const recordElement = document.getElementById('record');
+            if (recordHoldTime > 0 || lastHoldTime > 0) {
+                const lastTimeStr = lastHoldTime > 0 ? formatTime(lastHoldTime) : '--';
+                const recordTimeStr = recordHoldTime > 0 ? formatTime(recordHoldTime) : '--';
+                recordElement.textContent = `${t.lastRound}: ${lastTimeStr} / ${t.allTimeRecord}: ${recordTimeStr}`;
+                recordElement.title = t.clickForStats;
+                
+                // Add touch event handling
+                recordElement.addEventListener('touchend', (e) => {
+                    e.preventDefault();  // Prevent any default behavior
+                    window.location.href = '4.html';
+                });
+                
+                // Keep click event for non-touch devices
+                recordElement.addEventListener('click', (e) => {
+                    window.location.href = '4.html';
+                });
+            }
+
+            actionButton.textContent = getButtonText();
+            actionButton.style.visibility = phase === 'recovery' ? 'hidden' : 'visible';
+            updateCardHighlight();
+
+            if (phase === 'recovery' && timer >= 15) {
+                counter.classList.add('blinking');
+            } else {
+                counter.classList.remove('blinking');
+            }
+        }
+
+        function updateCardHighlight() {
+            cardBreathing.classList.toggle('active', phase === 'breathing');
+            cardRetention.classList.toggle('active', phase === 'retention');
+            cardRecovery.classList.toggle('active', phase === 'recovery');
+        }
+
+        function getButtonText() {
+            switch (phase) {
+                case 'idle':
+                    return t.startRoundOf.replace('{0}', `${round}/3`);
+                case 'breathing':
+                    return t.registerBreath;
+                case 'retention':
+                    return t.endRetention;
+                case 'recovery':
+                    return '';
+                case 'completed':
+                    return t.restart;
+                default:
+                    return '';
+            }
+        }
+
+        function startTimer() {
+            intervalId = setInterval(() => {
+                timer++;
+                updateDisplay();
+                
+                // Auto-proceed after 15 seconds in recovery phase
+                if (phase === 'recovery' && timer >= 15) {
+                    completedRoundsCount++;
+                    stopTimer();
+                    if (round < 3) {
+                        round++;
+                        phase = 'idle';
+                    } else {
+                        phase = 'completed';
+                    }
+                    updateDisplay();
+                }
+            }, 1000);
+        }
+
+        function stopTimer() {
+            clearInterval(intervalId);
+        }
+
+        function vibrate(duration = 20) {
+            if ('vibrate' in navigator) {
+                navigator.vibrate(duration);
+            }
+        }
+
+        function handleButtonAction() {
+            switch (phase) {
+                case 'idle':
+                    vibrate();
+                    phase = 'breathing';
+                    breathCount = 0;
+                    timer = 0;
+                    sessionStartTime = Date.now();
+                    startTimer();
+                    break;
+                case 'breathing':
+                    // Prevent clicks during transition
+                    if (isTransitioning) return;
+                    
+                    vibrate(10);
+                    breathCount++;
+                    const remainingBreaths = 30 - breathCount;
+                    if (remainingBreaths === 0) {
+                        // Set transitioning flag
+                        isTransitioning = true;
+                        // Show 0 for one second before moving to retention
+                        updateDisplay();
+                        setTimeout(() => {
+                            vibrate(50);
+                            phase = 'retention';
+                            timer = 0;
+                            breathHoldStart = Date.now();
+                            isTransitioning = false;  // Reset flag
+                            updateDisplay();
+                        }, 1000);
+                        return;
+                    }
+                    break;
+                case 'retention':
+                    if (cooldownActive) return;  // Prevent clicks during cooldown
+                    
+                    currentHoldTime = Math.floor((Date.now() - breathHoldStart) / 1000);
+                    lastHoldTime = currentHoldTime;
+                    
+                    const breathHolds = JSON.parse(localStorage.getItem('wimHofBreathHolds') || '[]');
+                    breathHolds.push({
+                        duration: currentHoldTime,
+                        timestamp: sessionStartTime
+                    });
+                    localStorage.setItem('wimHofBreathHolds', JSON.stringify(breathHolds));
+                    
+                    if (currentHoldTime > recordHoldTime) {
+                        recordHoldTime = currentHoldTime;
+                        localStorage.setItem('wimHofRecord', recordHoldTime);
+                    }
+                    
+                    // Set cooldown when transitioning to recovery
+                    cooldownActive = true;
+                    setTimeout(() => {
+                        cooldownActive = false;
+                    }, 3000);  // 3 second cooldown
+                    
+                    phase = 'recovery';
+                    timer = 0;
+                    break;
+                case 'recovery':
+                    break;
+                case 'completed':
+                    // Increment total sessions
+                    sessionsCount++;
+                    localStorage.setItem('wimHofSessions', sessionsCount);
+                    
+                    // Store the best breath hold from this session
+                    const sessionBreathHolds = JSON.parse(localStorage.getItem('wimHofBreathHolds') || '[]');
+                    const lastThreeHolds = sessionBreathHolds.slice(-3);
+                    const bestHoldThisSession = Math.max(...lastThreeHolds);
+                    localStorage.setItem('wimHofLastSession', bestHoldThisSession);
+                    
+                    // Update monthly sessions - make sure we create a new Date object
+                    const currentDate = new Date();
+                    const monthKey = `wimHofSessions_${currentDate.getFullYear()}-${(currentDate.getMonth() + 1)}`;
+                    const currentMonthSessions = parseInt(localStorage.getItem(monthKey) || '0');
+                    localStorage.setItem(monthKey, currentMonthSessions + 1);
+                    
+                    round = 1;
+                    completedRoundsCount = 0;
+                    lastHoldTime = 0;
+                    phase = 'idle';
+                    break;
+            }
+            updateDisplay();
+        }
+
+        function handleInteraction(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            handleButtonAction();
+        }
+
+        actionButton.addEventListener('touchstart', handleInteraction, { passive: false });
+        actionButton.addEventListener('mousedown', handleInteraction);
+
+        document.body.addEventListener('touchstart', function(e) {
+            if (e.target !== actionButton) e.preventDefault();
+        }, { passive: false });
+
+        document.body.addEventListener('touchmove', function(e) {
+            e.preventDefault();
+        }, { passive: false });
+
+        document.body.addEventListener('touchend', function(e) {
+            if (e.target !== actionButton) e.preventDefault();
+        }, { passive: false });
+
+        updateDisplay();
+    </script>
+</body>
+</html>

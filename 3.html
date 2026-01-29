@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nadi Shodhana</title>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            overflow-x: hidden;
+        }
+        .background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgb(102, 126, 234) 0%, rgb(118, 75, 162) 100%);
+            z-index: -1;
+        }
+        .content {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 10px;
+            box-sizing: border-box;
+        }
+        .card {
+            background-color: rgba(255, 255, 255, 0.9);
+            border-radius: 20px;
+            box-shadow: rgba(0, 0, 0, 0.2) 0px 10px 30px 0px;
+            color: rgb(51, 51, 51);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+            width: 98%;
+            max-width: 320px;
+            padding: 10px;
+            text-align: center;
+            overflow-y: auto;
+            max-height: 90vh;
+        }
+        h1 {
+            color: rgb(51, 51, 51);
+            font-size: 1.4rem;
+            margin-bottom: 10px;
+        }
+        .subtitle {
+            color: rgb(102, 102, 102);
+            font-size: 0.8rem;
+            margin-bottom: 0px;
+        }
+        .timer-circle {
+            width: 75px;
+            height: 75px;
+            border: 6px solid rgba(230, 230, 235, 0.8);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 10px auto;
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #4a4a4a;
+            background-color: white;
+        }
+        .step {
+            background-color: rgb(255, 255, 255);
+            border: 1px solid rgb(224, 224, 224);
+            border-radius: 8px;
+            box-shadow: rgba(0, 0, 0, 0.1) 0px 2px 4px 0px;
+            color: rgb(51, 51, 51);
+            font-size: 0.85rem;
+            padding: 10px;
+            margin-bottom: 8px;
+            text-align: left;
+            transition: all 0.3s ease;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        .step.active {
+            background-color: rgb(66, 153, 225);
+            color: white;
+        }
+        .cycles {
+            margin: 15px 0;
+            font-size: 0.9rem;
+            font-weight: bold;
+        }
+        button {
+            align-items: flex-start;
+            appearance: auto;
+            background-color: rgb(72, 187, 120);
+            border: none;
+            border-radius: 25px;
+            box-sizing: border-box;
+            color: rgb(255, 255, 255);
+            cursor: pointer;
+            display: block;
+            font-family: system-ui;
+            font-size: 16px;
+            font-weight: 700;
+            height: 38px;
+            line-height: normal;
+            margin: 0 auto;
+            padding: 10px 15px;
+            text-align: center;
+            touch-action: manipulation;
+            transition: background-color 0.1s ease, transform 0.1s ease;
+            width: 240px;
+            word-spacing: 0px;
+            -webkit-user-select: none;
+        }
+        button:hover {
+            opacity: 0.9;
+        }
+    </style>
+</head>
+<body>
+    <div class="background"></div>
+    <div class="content">
+        <div class="card">
+            <h1 id="title"></h1>
+            <div id="subtitle" class="subtitle"></div>
+            <div class="timer-circle" id="timer">5</div>
+            <div class="step" id="step0"></div>
+            <div class="step" id="step1"></div>
+            <div class="step" id="step2"></div>
+            <div class="step" id="step3"></div>
+            <div class="cycles" id="cycleCounter"></div>
+            <button id="controlBtn">Start</button>
+        </div>
+    </div>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        try {
+            const translations = {
+                nb: {
+                    title: "Vekselvis nesepusting",
+                    subtitle: "Bruk høyre hånd: tommel for høyre nesebor, ringfinger for venstre nesebor",
+                    steps: [
+                        "Lukk høyre nesebor med tommelen, pust inn gjennom venstre nesebor",
+                        "Lukk venstre nesebor med ringfingeren, åpne høyre og pust ut",
+                        "Pust inn gjennom høyre nesebor",
+                        "Lukk høyre, åpne venstre og pust ut"
+                    ],
+                    cyclesText: "Fullførte runder: {0} av 4",
+                    startBtn: "Start",
+                    stopBtn: "Stopp",
+                    restartBtn: "Start På Nytt"
+                },
+                en: {
+                    title: "Alternate Nostril",
+                    subtitle: "Use your right hand: thumb for right nostril, ring finger for left nostril",
+                    steps: [
+                        "Close right nostril with thumb, inhale through left nostril",
+                        "Close left nostril with ring finger, open right and exhale",
+                        "Inhale through right nostril",
+                        "Close right, open left and exhale"
+                    ],
+                    cyclesText: "Completed rounds: {0} of 4",
+                    startBtn: "Start",
+                    stopBtn: "Stop",
+                    restartBtn: "Restart"
+                },
+                zh: {
+                    title: "交替鼻孔呼吸",
+                    subtitle: "使用右手：拇指用于右鼻孔，无名指用于左鼻孔",
+                    steps: [
+                        "用拇指关闭右鼻孔，从左鼻孔吸气",
+                        "用无名指关闭左鼻孔，打开右鼻孔呼气",
+                        "从右鼻孔吸气",
+                        "关闭右鼻孔，打开左鼻孔呼气"
+                    ],
+                    cyclesText: "完成轮数：{0}/4",
+                    startBtn: "开始",
+                    stopBtn: "停止",
+                    restartBtn: "重新开始"
+                },
+                hi: {
+                    title: "अल्टरनेट नोस्ट्रिल ब्रीदिंग",
+                    subtitle: "अपने दाहिने हाथ का उपयोग करें: दाहिने नथुने के लिए अंगूठा, बाएं नथुने के लिए अनामिका",
+                    steps: [
+                        "अंगूठे से दाहिने नथुने को बंद करें, बाएं नथुने से सांस लें",
+                        "अनामिका से बाएं नथुने को बंद करें, दाहिने को खोलें और सांस छोड़ें",
+                        "दाहिने नथुने से सांस लें",
+                        "दाहिने को बंद करें, बाएं को खोलें और सांस छोड़ें"
+                    ],
+                    cyclesText: "पूरे किए गए राउंड: {0}/4",
+                    startBtn: "शुरू करें",
+                    stopBtn: "रोकें",
+                    restartBtn: "पुनः प्रारंभ करें"
+                },
+                es: {
+                    title: "Respiración Alterna de Fosas Nasales",
+                    subtitle: "Use su mano derecha: pulgar para la fosa nasal derecha, anular para la izquierda",
+                    steps: [
+                        "Cierre la fosa nasal derecha con el pulgar, inhale por la izquierda",
+                        "Cierre la fosa nasal izquierda con el anular, abra la derecha y exhale",
+                        "Inhale por la fosa nasal derecha",
+                        "Cierre la derecha, abra la izquierda y exhale"
+                    ],
+                    cyclesText: "Rondas completadas: {0} de 4",
+                    startBtn: "Comenzar",
+                    stopBtn: "Detener",
+                    restartBtn: "Reiniciar"
+                },
+                ar: {
+                    title: "تنفس الأنف المتناوب",
+                    subtitle: "استخدم يدك اليمنى: الإبهام للمنخر الأيمن، الخنصر للمنخر الأيسر",
+                    steps: [
+                        "أغلق المنخر الأيمن بالإبهام، تنفس من المنخر الأيسر",
+                        "أغلق المنخر الأيسر بالخنصر، افتح الأيمن وأخرج الزفير",
+                        "تنفس من المنخر الأيمن",
+                        "أغلق الأيمن، افتح الأيسر وأخرج الزفير"
+                    ],
+                    cyclesText: "الجولات المكتملة: {0} من 4",
+                    startBtn: "ابدأ",
+                    stopBtn: "توقف",
+                    restartBtn: "إعادة البدء"
+                },
+                pt: {
+                    title: "Respiração Alternada das Narinas",
+                    subtitle: "Use a mão direita: polegar para a narina direita, dedo anelar para a esquerda",
+                    steps: [
+                        "Feche a narina direita com o polegar, inale pela esquerda",
+                        "Feche a narina esquerda com o anelar, abra a direita e exale",
+                        "Inale pela narina direita",
+                        "Feche a direita, abra a esquerda e exale"
+                    ],
+                    cyclesText: "Rodadas completas: {0} de 4",
+                    startBtn: "Iniciar",
+                    stopBtn: "Parar",
+                    restartBtn: "Reiniciar"
+                },
+                
+            };
+
+            function getLanguage() {
+                const userLang = navigator.language || navigator.userLanguage;
+                const langCode = userLang.split('-')[0];
+                return translations[langCode] ? langCode : 'en';
+            }
+
+            const lang = getLanguage();
+            const t = translations[lang];
+
+            let currentStep = 0;
+            let isRunning = false;
+            let timer;
+            let cycles = 0;
+            let seconds = 5;
+
+            function updateUI() {
+                document.getElementById('title').textContent = t.title;
+                document.getElementById('subtitle').textContent = t.subtitle;
+                t.steps.forEach((step, index) => {
+                    document.getElementById(`step${index}`).textContent = step;
+                });
+                document.getElementById('controlBtn').textContent = t.startBtn;
+                updateDisplay();
+            }
+
+            function updateDisplay() {
+                document.getElementById('timer').textContent = seconds;
+                document.getElementById('cycleCounter').textContent = t.cyclesText.replace('{0}', cycles);
+                t.steps.forEach((step, index) => {
+                    const stepElement = document.getElementById(`step${index}`);
+                    stepElement.classList.toggle('active', index === currentStep);
+                });
+            }
+
+            function nextStep() {
+                currentStep = (currentStep + 1) % t.steps.length;
+                if (currentStep === 0) {
+                    cycles++;
+                    if (cycles === 4) {
+                        stopExercise();
+                        return;
+                    }
+                }
+                seconds = 5;
+                updateDisplay();
+            }
+
+            function startStop() {
+                if (isRunning) {
+                    stopExercise();
+                } else {
+                    startExercise();
+                }
+            }
+
+            function startExercise() {
+                updateDisplay();
+                isRunning = true;
+                document.getElementById('controlBtn').textContent = t.stopBtn;
+                timer = setInterval(function() {
+                    if (seconds > 1) {
+                        seconds--;
+                        updateDisplay();
+                    } else {
+                        nextStep();
+                    }
+                }, 1000);
+            }
+
+            function stopExercise() {
+                clearInterval(timer);
+                isRunning = false;
+                document.getElementById('controlBtn').textContent = t.restartBtn;
+                currentStep = 0;
+                cycles = 0;
+                seconds = 5;
+                updateDisplay();
+            }
+
+            document.getElementById('controlBtn').addEventListener('click', startStop);
+
+            updateUI();
+        } catch (error) {
+            console.error('An error occurred:', error);
+        }
+    });
+    </script>
+</body>
+</html>
