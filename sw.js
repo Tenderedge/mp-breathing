@@ -1,4 +1,4 @@
-const CACHE_NAME = 'mp-breathing-v1';
+const CACHE_NAME = 'mp-breathing-v2';
 const ASSETS = [
     './',
     './index.html',
@@ -6,6 +6,7 @@ const ASSETS = [
     './2.html',
     './3.html',
     './4.html',
+    './5.html',
     './manifest.json',
     './icon-192.png',
     './icon-512.png'
