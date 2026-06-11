@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -569,15 +569,23 @@
         }
 
         // Update the updateDisplay function to also update the calendar
+        const backLabels = {
+            en: 'Back', nb: 'Tilbake', es: 'Volver', zh: '返回', hi: 'वापस',
+            ar: 'رجوع', pt: 'Voltar', ru: 'Назад', ja: '戻る', de: 'Zurück',
+            fr: 'Retour', ko: '뒤로', it: 'Indietro', tr: 'Geri', vi: 'Quay lại',
+            pl: 'Wstecz'
+        };
+
         function updateDisplay() {
             const userLang = navigator.language.split('-')[0];
             const t = translations[userLang] || translations.en;
-            
+            document.documentElement.lang = translations[userLang] ? userLang : 'en';
+
             // Update page text
             document.getElementById('title').textContent = t.title;
             document.getElementById('headerMetric').textContent = t.headerMetric;
             document.getElementById('headerValue').textContent = t.headerValue;
-            document.getElementById('backButton').textContent = "Back";
+            document.getElementById('backButton').textContent = backLabels[userLang] || backLabels.en;
 
             const stats = getStats();
             const tbody = document.getElementById('statsBody');

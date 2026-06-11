@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -29,6 +29,7 @@
             box-sizing: border-box;
         }
         .card {
+            position: relative;
             background-color: rgba(255, 255, 255, 0.9);
             border-radius: 20px;
             box-shadow: rgba(0, 0, 0, 0.2) 0px 10px 30px 0px;
@@ -118,12 +119,32 @@
         button:hover {
             opacity: 0.9;
         }
+        .home-link {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            background-color: #f5f5f7;
+            color: #4a4a4a;
+            text-decoration: none;
+            font-size: 18px;
+            line-height: 1;
+        }
+        .home-link:hover {
+            background-color: #e0e0e5;
+        }
     </style>
 </head>
 <body>
     <div class="background"></div>
     <div class="content">
         <div class="card">
+            <a href="index.html" class="home-link" aria-label="Home">←</a>
             <h1 id="title"></h1>
             <div id="subtitle" class="subtitle"></div>
             <div class="timer-circle" id="timer">5</div>
@@ -249,6 +270,31 @@
 
             const lang = getLanguage();
             const t = translations[lang];
+            document.documentElement.lang = lang;
+
+            let wakeLock = null;
+            let wakeLockWanted = false;
+            async function requestWakeLock() {
+                wakeLockWanted = true;
+                if (!('wakeLock' in navigator)) return;
+                try {
+                    wakeLock = await navigator.wakeLock.request('screen');
+                } catch (e) {
+                    // Wake lock is best-effort; the exercise still works without it
+                }
+            }
+            function releaseWakeLock() {
+                wakeLockWanted = false;
+                if (wakeLock) {
+                    wakeLock.release().catch(function() {});
+                    wakeLock = null;
+                }
+            }
+            document.addEventListener('visibilitychange', function() {
+                if (document.visibilityState === 'visible' && wakeLockWanted) {
+                    requestWakeLock();
+                }
+            });
 
             let currentStep = 0;
             let isRunning = false;
@@ -299,6 +345,7 @@
             function startExercise() {
                 updateDisplay();
                 isRunning = true;
+                requestWakeLock();
                 document.getElementById('controlBtn').textContent = t.stopBtn;
                 timer = setInterval(function() {
                     if (seconds > 1) {
@@ -313,6 +360,7 @@
             function stopExercise() {
                 clearInterval(timer);
                 isRunning = false;
+                releaseWakeLock();
                 document.getElementById('controlBtn').textContent = t.restartBtn;
                 currentStep = 0;
                 cycles = 0;

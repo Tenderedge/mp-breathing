@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -25,6 +25,7 @@
         }
 
         .container {
+            position: relative;
             text-align: center;
             background-color: rgba(255, 255, 255, 0.9);
             padding: 15px;
@@ -33,6 +34,27 @@
             width: 100%;
             max-width: 320px;
             margin-top: 10px;
+        }
+
+        .home-link {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            background-color: #f7fafc;
+            color: #4a5568;
+            text-decoration: none;
+            font-size: 18px;
+            line-height: 1;
+        }
+
+        .home-link:hover {
+            background-color: #e2e8f0;
         }
 
         h1 {
@@ -132,6 +154,7 @@
 </head>
 <body>
     <div class="container">
+        <a href="index.html" class="home-link" aria-label="Home">←</a>
         <h1 id="title">Pusteøvelse</h1>
         <h2 id="subtitle">Gjøres to ganger om dagen</h2>
         <div class="progress-ring">
@@ -408,6 +431,31 @@
 
             const userLanguage = navigator.language.split('-')[0];
             const lang = translations[userLanguage] ? userLanguage : 'en';
+            document.documentElement.lang = lang;
+
+            let wakeLock = null;
+            let wakeLockWanted = false;
+            async function requestWakeLock() {
+                wakeLockWanted = true;
+                if (!('wakeLock' in navigator)) return;
+                try {
+                    wakeLock = await navigator.wakeLock.request('screen');
+                } catch (e) {
+                    // Wake lock is best-effort; the exercise still works without it
+                }
+            }
+            function releaseWakeLock() {
+                wakeLockWanted = false;
+                if (wakeLock) {
+                    wakeLock.release().catch(function() {});
+                    wakeLock = null;
+                }
+            }
+            document.addEventListener('visibilitychange', function() {
+                if (document.visibilityState === 'visible' && wakeLockWanted) {
+                    requestWakeLock();
+                }
+            });
 
 
             document.getElementById('title').textContent = translations[lang].title;
@@ -467,7 +515,7 @@
                 if (currentPhase === 0) {
                     cyclesCompleted++;
                     if (cyclesCompleted >= 4) {
-                        stopExercise();
+                        finishExercise();
                         return;
                     }
                 }
@@ -505,6 +553,7 @@
                 timeLeft = phases[currentPhase].duration;
                 lastTime = 0;
                 accumulatedTime = 0;
+                requestWakeLock();
                 updateDisplay();
                 requestAnimationFrame(tick);
             }
@@ -515,6 +564,18 @@
                 cyclesCompleted = 0;
                 lastTime = 0;
                 accumulatedTime = 0;
+                releaseWakeLock();
+                updateDisplay();
+            }
+
+            // Like stopExercise, but keeps the 4/4 cycle count visible so the
+            // user gets confirmation that the session finished
+            function finishExercise() {
+                isActive = false;
+                currentPhase = 0;
+                lastTime = 0;
+                accumulatedTime = 0;
+                releaseWakeLock();
                 updateDisplay();
             }
 
