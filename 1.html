@@ -4,6 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Pusteøvelse / Breathing Exercise</title>
+    <meta name="theme-color" content="#667eea">
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/png" href="icon-192.png">
+    <link rel="apple-touch-icon" href="icon-192.png">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap');
         
@@ -133,7 +137,8 @@
             position: relative;
             width: 100px;
             height: 100px;
-            margin: 10px auto;
+            margin: 16px auto;
+            will-change: transform;
         }
 
         .progress-ring__circle {
@@ -172,6 +177,10 @@
     </div>
 
     <script>
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('sw.js');
+        }
+
         document.addEventListener('DOMContentLoaded', function() {
             const translations = {
     'nb': {
@@ -478,6 +487,7 @@
             const cyclesElement = document.getElementById('cycles');
             const timeLeftElement = document.getElementById('timeLeft');
             const progressCircle = document.getElementById('progress-circle');
+            const progressRing = document.querySelector('.progress-ring');
             const circumference = 2 * Math.PI * 42;
 
             progressCircle.style.strokeDasharray = `${circumference} ${circumference}`;
@@ -486,6 +496,26 @@
             function setProgress(percent) {
                 const offset = circumference - (percent / 100 * circumference);
                 progressCircle.style.strokeDashoffset = offset;
+            }
+
+            // Grow the ring while inhaling, keep it large during the hold and
+            // shrink it back while exhaling, as a visual pacing guide
+            function animateGuide() {
+                if (!isActive) {
+                    progressRing.style.transition = 'transform 0.5s ease';
+                    progressRing.style.transform = 'scale(1)';
+                    return;
+                }
+                if (currentPhase === 0) {
+                    progressRing.style.transition = `transform ${phases[0].duration}s ease-in-out`;
+                    progressRing.style.transform = 'scale(1.2)';
+                } else if (currentPhase === 1) {
+                    progressRing.style.transition = 'transform 0.3s ease';
+                    progressRing.style.transform = 'scale(1.2)';
+                } else {
+                    progressRing.style.transition = `transform ${phases[2].duration}s ease-in-out`;
+                    progressRing.style.transform = 'scale(1)';
+                }
             }
 
             function updateDisplay() {
@@ -508,6 +538,7 @@
                     timeLeftElement.textContent = '';
                     setProgress(0);
                 }
+                animateGuide();
             }
 
             function nextPhase() {
