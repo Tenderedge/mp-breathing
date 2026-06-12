@@ -137,6 +137,31 @@
             padding: 14px 6px;
             line-height: 1.5;
         }
+        .preset-select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid rgb(224, 224, 224);
+            border-radius: 8px;
+            font-size: 14px;
+            font-family: inherit;
+            background-color: white;
+            color: #4a4a4a;
+            margin-bottom: 8px;
+            box-sizing: border-box;
+        }
+        .icon-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        .icon-btn svg {
+            flex-shrink: 0;
+        }
+        .row-controls button svg {
+            display: block;
+            margin: 0 auto;
+        }
         .add-row {
             display: flex;
             gap: 8px;
@@ -285,16 +310,20 @@
     <div class="background"></div>
     <div class="content">
         <div class="card">
-            <a href="index.html" class="home-link" aria-label="Home">←</a>
+            <a href="index.html" class="home-link" aria-label="Home"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="15 18 9 12 15 6"/></svg></a>
             <h1 id="title"></h1>
             <div id="subtitle" class="subtitle"></div>
             <div id="slideList"></div>
             <div id="emptyState"></div>
+            <select id="presetSelect" class="preset-select"></select>
             <div class="add-row">
                 <input id="affirmationInput" type="text" maxlength="200">
                 <button id="addTextBtn"></button>
             </div>
-            <button id="addImageBtn"></button>
+            <button id="addImageBtn" class="icon-btn">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+                <span id="addImageLabel"></span>
+            </button>
             <input type="file" id="imageInput" accept="image/*" hidden>
             <div class="duration-row">
                 <label for="durationSelect" id="durationLabel"></label>
@@ -314,7 +343,10 @@
                     <option value="rain"></option>
                 </select>
             </div>
-            <button id="playBtn"></button>
+            <button id="playBtn" class="icon-btn">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><polygon points="6 3 20 12 6 21"/></svg>
+                <span id="playLabel"></span>
+            </button>
         </div>
     </div>
 
@@ -347,7 +379,18 @@
                 musicOff: "Off",
                 musicCalm: "Calm tones",
                 musicOcean: "Ocean waves",
-                musicRain: "Rain"
+                musicRain: "Rain",
+                presetLabel: "Choose an affirmation...",
+                presets: [
+                    "I am calm and at peace",
+                    "I am healthy and full of energy",
+                    "I believe in myself",
+                    "I am grateful for everything I have",
+                    "I reach my goals with ease",
+                    "Every day I grow stronger",
+                    "I deserve happiness and success",
+                    "I radiate love and positivity"
+                ]
             },
             nb: {
                 title: "Tankefilm",
@@ -365,7 +408,18 @@
                 musicOff: "Av",
                 musicCalm: "Rolige toner",
                 musicOcean: "Havbølger",
-                musicRain: "Regn"
+                musicRain: "Regn",
+                presetLabel: "Velg en affirmasjon...",
+                presets: [
+                    "Jeg er rolig og avslappet",
+                    "Jeg er frisk og full av energi",
+                    "Jeg tror på meg selv",
+                    "Jeg er takknemlig for alt jeg har",
+                    "Jeg når målene mine med letthet",
+                    "Hver dag blir jeg sterkere",
+                    "Jeg fortjener lykke og suksess",
+                    "Jeg utstråler kjærlighet og positivitet"
+                ]
             },
             zh: {
                 title: "心灵电影",
@@ -383,7 +437,18 @@
                 musicOff: "关闭",
                 musicCalm: "舒缓音调",
                 musicOcean: "海浪",
-                musicRain: "雨声"
+                musicRain: "雨声",
+                presetLabel: "选择一句肯定语...",
+                presets: [
+                    "我平静而安宁",
+                    "我健康且充满活力",
+                    "我相信自己",
+                    "我感恩我所拥有的一切",
+                    "我轻松实现我的目标",
+                    "我每天都变得更强大",
+                    "我值得拥有幸福和成功",
+                    "我散发着爱与正能量"
+                ]
             },
             es: {
                 title: "Película Mental",
@@ -401,7 +466,18 @@
                 musicOff: "Apagada",
                 musicCalm: "Tonos relajantes",
                 musicOcean: "Olas del mar",
-                musicRain: "Lluvia"
+                musicRain: "Lluvia",
+                presetLabel: "Elige una afirmación...",
+                presets: [
+                    "Estoy en calma y en paz",
+                    "Estoy sano y lleno de energía",
+                    "Creo en mí mismo",
+                    "Estoy agradecido por todo lo que tengo",
+                    "Alcanzo mis metas con facilidad",
+                    "Cada día me hago más fuerte",
+                    "Merezco la felicidad y el éxito",
+                    "Irradio amor y positividad"
+                ]
             },
             hi: {
                 title: "मन की फिल्म",
@@ -419,7 +495,18 @@
                 musicOff: "बंद",
                 musicCalm: "शांत स्वर",
                 musicOcean: "समुद्री लहरें",
-                musicRain: "बारिश"
+                musicRain: "बारिश",
+                presetLabel: "एक सकारात्मक वाक्य चुनें...",
+                presets: [
+                    "मैं शांत और स्थिर हूं",
+                    "मैं स्वस्थ और ऊर्जा से भरपूर हूं",
+                    "मुझे खुद पर विश्वास है",
+                    "मैं अपनी हर चीज़ के लिए आभारी हूं",
+                    "मैं आसानी से अपने लक्ष्य प्राप्त करता हूं",
+                    "हर दिन मैं और मजबूत होता हूं",
+                    "मैं खुशी और सफलता का हकदार हूं",
+                    "मैं प्रेम और सकारात्मकता फैलाता हूं"
+                ]
             },
             ar: {
                 title: "فيلم ذهني",
@@ -437,7 +524,18 @@
                 musicOff: "إيقاف",
                 musicCalm: "نغمات هادئة",
                 musicOcean: "أمواج البحر",
-                musicRain: "مطر"
+                musicRain: "مطر",
+                presetLabel: "اختر عبارة تحفيزية...",
+                presets: [
+                    "أنا هادئ ومطمئن",
+                    "أنا بصحة جيدة ومليء بالطاقة",
+                    "أؤمن بنفسي",
+                    "أنا ممتن لكل ما أملك",
+                    "أحقق أهدافي بسهولة",
+                    "أزداد قوة كل يوم",
+                    "أستحق السعادة والنجاح",
+                    "أشع حبًا وإيجابية"
+                ]
             },
             pt: {
                 title: "Filme Mental",
@@ -455,7 +553,18 @@
                 musicOff: "Desligada",
                 musicCalm: "Tons calmos",
                 musicOcean: "Ondas do mar",
-                musicRain: "Chuva"
+                musicRain: "Chuva",
+                presetLabel: "Escolha uma afirmação...",
+                presets: [
+                    "Estou calmo e em paz",
+                    "Sou saudável e cheio de energia",
+                    "Acredito em mim",
+                    "Sou grato por tudo o que tenho",
+                    "Alcanço meus objetivos com facilidade",
+                    "A cada dia fico mais forte",
+                    "Mereço felicidade e sucesso",
+                    "Irradio amor e positividade"
+                ]
             },
             bn: {
                 title: "মনের সিনেমা",
@@ -473,7 +582,18 @@
                 musicOff: "বন্ধ",
                 musicCalm: "শান্ত সুর",
                 musicOcean: "সমুদ্রের ঢেউ",
-                musicRain: "বৃষ্টি"
+                musicRain: "বৃষ্টি",
+                presetLabel: "একটি ইতিবাচক বাক্য বেছে নিন...",
+                presets: [
+                    "আমি শান্ত ও স্থির",
+                    "আমি সুস্থ ও শক্তিতে পরিপূর্ণ",
+                    "আমি নিজের উপর বিশ্বাস রাখি",
+                    "আমার যা আছে তার জন্য আমি কৃতজ্ঞ",
+                    "আমি সহজেই আমার লক্ষ্যে পৌঁছাই",
+                    "প্রতিদিন আমি আরও শক্তিশালী হচ্ছি",
+                    "আমি সুখ ও সাফল্যের যোগ্য",
+                    "আমি ভালোবাসা ও ইতিবাচকতা ছড়িয়ে দিই"
+                ]
             },
             ru: {
                 title: "Ментальный фильм",
@@ -491,7 +611,18 @@
                 musicOff: "Выкл",
                 musicCalm: "Спокойные тона",
                 musicOcean: "Шум океана",
-                musicRain: "Дождь"
+                musicRain: "Дождь",
+                presetLabel: "Выберите аффирмацию...",
+                presets: [
+                    "Я спокоен и умиротворён",
+                    "Я здоров и полон энергии",
+                    "Я верю в себя",
+                    "Я благодарен за всё, что имею",
+                    "Я легко достигаю своих целей",
+                    "С каждым днём я становлюсь сильнее",
+                    "Я заслуживаю счастья и успеха",
+                    "Я излучаю любовь и позитив"
+                ]
             },
             ja: {
                 title: "マインドムービー",
@@ -509,7 +640,18 @@
                 musicOff: "オフ",
                 musicCalm: "穏やかな音色",
                 musicOcean: "海の波",
-                musicRain: "雨"
+                musicRain: "雨",
+                presetLabel: "アファメーションを選ぶ...",
+                presets: [
+                    "私は穏やかで安らかです",
+                    "私は健康でエネルギーに満ちています",
+                    "私は自分を信じています",
+                    "私は持っているすべてに感謝しています",
+                    "私は楽に目標を達成します",
+                    "私は日々強くなっています",
+                    "私は幸せと成功に値します",
+                    "私は愛とポジティブさを放っています"
+                ]
             },
             de: {
                 title: "Gedankenfilm",
@@ -527,7 +669,18 @@
                 musicOff: "Aus",
                 musicCalm: "Ruhige Klänge",
                 musicOcean: "Meereswellen",
-                musicRain: "Regen"
+                musicRain: "Regen",
+                presetLabel: "Affirmation auswählen...",
+                presets: [
+                    "Ich bin ruhig und gelassen",
+                    "Ich bin gesund und voller Energie",
+                    "Ich glaube an mich",
+                    "Ich bin dankbar für alles, was ich habe",
+                    "Ich erreiche meine Ziele mit Leichtigkeit",
+                    "Jeden Tag werde ich stärker",
+                    "Ich verdiene Glück und Erfolg",
+                    "Ich strahle Liebe und Positivität aus"
+                ]
             },
             fr: {
                 title: "Film Mental",
@@ -545,7 +698,18 @@
                 musicOff: "Désactivée",
                 musicCalm: "Tons apaisants",
                 musicOcean: "Vagues de l'océan",
-                musicRain: "Pluie"
+                musicRain: "Pluie",
+                presetLabel: "Choisir une affirmation...",
+                presets: [
+                    "Je suis calme et serein",
+                    "Je suis en bonne santé et plein d'énergie",
+                    "Je crois en moi",
+                    "Je suis reconnaissant pour tout ce que j'ai",
+                    "J'atteins mes objectifs avec facilité",
+                    "Chaque jour je deviens plus fort",
+                    "Je mérite le bonheur et le succès",
+                    "Je rayonne d'amour et de positivité"
+                ]
             },
             ko: {
                 title: "마인드 무비",
@@ -563,7 +727,18 @@
                 musicOff: "끄기",
                 musicCalm: "차분한 음색",
                 musicOcean: "바다 파도",
-                musicRain: "비"
+                musicRain: "비",
+                presetLabel: "긍정의 문구 선택...",
+                presets: [
+                    "나는 차분하고 평온하다",
+                    "나는 건강하고 에너지가 넘친다",
+                    "나는 나 자신을 믿는다",
+                    "나는 내가 가진 모든 것에 감사한다",
+                    "나는 쉽게 목표를 이룬다",
+                    "나는 매일 더 강해진다",
+                    "나는 행복과 성공을 누릴 자격이 있다",
+                    "나는 사랑과 긍정을 발산한다"
+                ]
             },
             it: {
                 title: "Film Mentale",
@@ -581,7 +756,18 @@
                 musicOff: "Spenta",
                 musicCalm: "Toni calmi",
                 musicOcean: "Onde del mare",
-                musicRain: "Pioggia"
+                musicRain: "Pioggia",
+                presetLabel: "Scegli un'affermazione...",
+                presets: [
+                    "Sono calmo e in pace",
+                    "Sono sano e pieno di energia",
+                    "Credo in me stesso",
+                    "Sono grato per tutto ciò che ho",
+                    "Raggiungo i miei obiettivi con facilità",
+                    "Ogni giorno divento più forte",
+                    "Merito felicità e successo",
+                    "Irradio amore e positività"
+                ]
             },
             id: {
                 title: "Film Pikiran",
@@ -599,7 +785,18 @@
                 musicOff: "Mati",
                 musicCalm: "Nada tenang",
                 musicOcean: "Ombak laut",
-                musicRain: "Hujan"
+                musicRain: "Hujan",
+                presetLabel: "Pilih afirmasi...",
+                presets: [
+                    "Saya tenang dan damai",
+                    "Saya sehat dan penuh energi",
+                    "Saya percaya pada diri sendiri",
+                    "Saya bersyukur atas semua yang saya miliki",
+                    "Saya mencapai tujuan saya dengan mudah",
+                    "Setiap hari saya semakin kuat",
+                    "Saya layak mendapatkan kebahagiaan dan kesuksesan",
+                    "Saya memancarkan cinta dan hal positif"
+                ]
             },
             tr: {
                 title: "Zihin Filmi",
@@ -617,7 +814,18 @@
                 musicOff: "Kapalı",
                 musicCalm: "Sakin tonlar",
                 musicOcean: "Okyanus dalgaları",
-                musicRain: "Yağmur"
+                musicRain: "Yağmur",
+                presetLabel: "Bir olumlama seçin...",
+                presets: [
+                    "Sakinim ve huzurluyum",
+                    "Sağlıklıyım ve enerji doluyum",
+                    "Kendime inanıyorum",
+                    "Sahip olduğum her şey için minnettarım",
+                    "Hedeflerime kolayca ulaşıyorum",
+                    "Her gün daha da güçleniyorum",
+                    "Mutluluğu ve başarıyı hak ediyorum",
+                    "Sevgi ve pozitiflik yayıyorum"
+                ]
             },
             nl: {
                 title: "Gedachtenfilm",
@@ -635,7 +843,18 @@
                 musicOff: "Uit",
                 musicCalm: "Rustige tonen",
                 musicOcean: "Oceaangolven",
-                musicRain: "Regen"
+                musicRain: "Regen",
+                presetLabel: "Kies een affirmatie...",
+                presets: [
+                    "Ik ben kalm en in vrede",
+                    "Ik ben gezond en vol energie",
+                    "Ik geloof in mezelf",
+                    "Ik ben dankbaar voor alles wat ik heb",
+                    "Ik bereik mijn doelen met gemak",
+                    "Elke dag word ik sterker",
+                    "Ik verdien geluk en succes",
+                    "Ik straal liefde en positiviteit uit"
+                ]
             },
             vi: {
                 title: "Phim Tâm Trí",
@@ -653,7 +872,18 @@
                 musicOff: "Tắt",
                 musicCalm: "Âm thanh êm dịu",
                 musicOcean: "Sóng biển",
-                musicRain: "Mưa"
+                musicRain: "Mưa",
+                presetLabel: "Chọn một câu khẳng định...",
+                presets: [
+                    "Tôi bình tĩnh và an yên",
+                    "Tôi khỏe mạnh và tràn đầy năng lượng",
+                    "Tôi tin vào chính mình",
+                    "Tôi biết ơn tất cả những gì mình có",
+                    "Tôi đạt được mục tiêu một cách dễ dàng",
+                    "Mỗi ngày tôi càng mạnh mẽ hơn",
+                    "Tôi xứng đáng với hạnh phúc và thành công",
+                    "Tôi lan tỏa yêu thương và sự tích cực"
+                ]
             },
             th: {
                 title: "ภาพยนตร์ในใจ",
@@ -671,7 +901,18 @@
                 musicOff: "ปิด",
                 musicCalm: "เสียงสงบ",
                 musicOcean: "คลื่นทะเล",
-                musicRain: "ฝน"
+                musicRain: "ฝน",
+                presetLabel: "เลือกคำยืนยัน...",
+                presets: [
+                    "ฉันสงบและเป็นสุข",
+                    "ฉันแข็งแรงและเต็มไปด้วยพลัง",
+                    "ฉันเชื่อมั่นในตัวเอง",
+                    "ฉันขอบคุณทุกสิ่งที่ฉันมี",
+                    "ฉันบรรลุเป้าหมายได้อย่างง่ายดาย",
+                    "ทุกวันฉันแข็งแกร่งขึ้น",
+                    "ฉันคู่ควรกับความสุขและความสำเร็จ",
+                    "ฉันเปล่งประกายความรักและพลังบวก"
+                ]
             }
         };
 
@@ -717,6 +958,7 @@
 
         const slideList = document.getElementById('slideList');
         const emptyState = document.getElementById('emptyState');
+        const presetSelect = document.getElementById('presetSelect');
         const affirmationInput = document.getElementById('affirmationInput');
         const addTextBtn = document.getElementById('addTextBtn');
         const addImageBtn = document.getElementById('addImageBtn');
@@ -738,8 +980,24 @@
         musicSelect.options[3].textContent = t.musicRain;
         affirmationInput.placeholder = t.placeholder;
         addTextBtn.textContent = t.add;
-        addImageBtn.textContent = '📷 ' + t.addImage;
-        playBtn.textContent = '▶ ' + t.play;
+        document.getElementById('addImageLabel').textContent = t.addImage;
+        document.getElementById('playLabel').textContent = t.play;
+
+        const placeholderOption = document.createElement('option');
+        placeholderOption.value = '';
+        placeholderOption.textContent = t.presetLabel;
+        presetSelect.appendChild(placeholderOption);
+        t.presets.forEach(function(preset) {
+            const option = document.createElement('option');
+            option.value = preset;
+            option.textContent = preset;
+            presetSelect.appendChild(option);
+        });
+        presetSelect.addEventListener('change', function() {
+            if (!presetSelect.value) return;
+            addSlide({ type: 'text', text: presetSelect.value });
+            presetSelect.selectedIndex = 0;
+        });
 
         durationSelect.value = localStorage.getItem(DURATION_KEY) || '5';
         durationSelect.addEventListener('change', function() {
@@ -933,8 +1191,12 @@
                 const controls = document.createElement('div');
                 controls.className = 'row-controls';
 
+                const icon = function(paths) {
+                    return '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + paths + '</svg>';
+                };
+
                 const upBtn = document.createElement('button');
-                upBtn.textContent = '▲';
+                upBtn.innerHTML = icon('<polyline points="6 15 12 9 18 15"/>');
                 upBtn.setAttribute('aria-label', 'Move up');
                 upBtn.disabled = i === 0;
                 upBtn.addEventListener('click', function() {
@@ -944,7 +1206,7 @@
                 });
 
                 const downBtn = document.createElement('button');
-                downBtn.textContent = '▼';
+                downBtn.innerHTML = icon('<polyline points="6 9 12 15 18 9"/>');
                 downBtn.setAttribute('aria-label', 'Move down');
                 downBtn.disabled = i === slides.length - 1;
                 downBtn.addEventListener('click', function() {
@@ -955,7 +1217,7 @@
 
                 const deleteBtn = document.createElement('button');
                 deleteBtn.className = 'delete';
-                deleteBtn.textContent = '✕';
+                deleteBtn.innerHTML = icon('<polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>');
                 deleteBtn.setAttribute('aria-label', t.deleteSlide);
                 deleteBtn.addEventListener('click', function() {
                     slides.splice(i, 1);
