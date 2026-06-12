@@ -1,9 +1,13 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Wim Hof Breathing Method</title>
+    <meta name="theme-color" content="#667eea">
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/png" href="icon-192.png">
+    <link rel="apple-touch-icon" href="icon-192.png">
      <style>
         * {
             -webkit-tap-highlight-color: transparent;
@@ -28,6 +32,7 @@
             overflow-y: auto;
         }
         .card {
+            position: relative;
             background-color: rgba(255, 255, 255, 0.9);
             border-radius: 20px;
             box-shadow: rgba(0, 0, 0, 0.2) 0px 10px 30px 0px;
@@ -43,6 +48,25 @@
             margin-bottom: 20px;
             overflow-y: auto;
             max-height: calc(100vh - 40px);
+        }
+        .home-link {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            background-color: #f5f5f7;
+            color: #4a4a4a;
+            text-decoration: none;
+            font-size: 18px;
+            line-height: 1;
+        }
+        .home-link:active {
+            background-color: #e0e0e5;
         }
         h2 {
             margin: 0;
@@ -136,10 +160,14 @@
             background-color: rgba(255, 255, 255, 0.2);
         }
         #record::after {
-            content: " 📊";
-            font-size: 0.9em;
+            content: "";
+            display: inline-block;
+            width: 13px;
+            height: 13px;
+            margin-left: 5px;
+            vertical-align: -2px;
             opacity: 0.8;
-            margin-left: 4px;
+            background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="%234a4a4a" stroke-width="2.5" stroke-linecap="round"><line x1="6" y1="20" x2="6" y2="12"/><line x1="12" y1="20" x2="12" y2="6"/><line x1="18" y1="20" x2="18" y2="14"/></svg>') no-repeat center / contain;
         }
         @keyframes cardPulse {
             0% { transform: scale(1); }
@@ -154,6 +182,7 @@
 </head>
 <body>
     <div class="card">
+        <a href="index.html" class="home-link" aria-label="Home"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="15 18 9 12 15 6"/></svg></a>
         <div>
             <h2 id="title"></h2>
             <p class="subtitle" id="subtitle"></p>
@@ -170,6 +199,10 @@
     </div>
 
     <script>
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('sw.js').catch(function() {});
+        }
+
         const translations = {
             en: {
                 title: "Wim Hof Breathing Method",
@@ -487,6 +520,31 @@
         // Set language, default to English if not supported
         const lang = translations[getBrowserLanguage()] ? getBrowserLanguage() : 'en';
         const t = translations[lang];
+        document.documentElement.lang = lang;
+
+        let wakeLock = null;
+        let wakeLockWanted = false;
+        async function requestWakeLock() {
+            wakeLockWanted = true;
+            if (!('wakeLock' in navigator)) return;
+            try {
+                wakeLock = await navigator.wakeLock.request('screen');
+            } catch (e) {
+                // Wake lock is best-effort; the exercise still works without it
+            }
+        }
+        function releaseWakeLock() {
+            wakeLockWanted = false;
+            if (wakeLock) {
+                wakeLock.release().catch(function() {});
+                wakeLock = null;
+            }
+        }
+        document.addEventListener('visibilitychange', function() {
+            if (document.visibilityState === 'visible' && wakeLockWanted) {
+                requestWakeLock();
+            }
+        });
 
         // Update all text content
         document.getElementById('title').textContent = t.title;
@@ -581,17 +639,6 @@
                 const recordTimeStr = recordHoldTime > 0 ? formatTime(recordHoldTime) : '--';
                 recordElement.textContent = `${t.lastRound}: ${lastTimeStr} / ${t.allTimeRecord}: ${recordTimeStr}`;
                 recordElement.title = t.clickForStats;
-                
-                // Add touch event handling
-                recordElement.addEventListener('touchend', (e) => {
-                    e.preventDefault();  // Prevent any default behavior
-                    window.location.href = '4.html';
-                });
-                
-                // Keep click event for non-touch devices
-                recordElement.addEventListener('click', (e) => {
-                    window.location.href = '4.html';
-                });
             }
 
             actionButton.textContent = getButtonText();
@@ -642,6 +689,7 @@
                         phase = 'idle';
                     } else {
                         phase = 'completed';
+                        releaseWakeLock();
                     }
                     updateDisplay();
                 }
@@ -666,6 +714,7 @@
                     breathCount = 0;
                     timer = 0;
                     sessionStartTime = Date.now();
+                    requestWakeLock();
                     startTimer();
                     break;
                 case 'breathing':
@@ -728,7 +777,9 @@
                     // Store the best breath hold from this session
                     const sessionBreathHolds = JSON.parse(localStorage.getItem('wimHofBreathHolds') || '[]');
                     const lastThreeHolds = sessionBreathHolds.slice(-3);
-                    const bestHoldThisSession = Math.max(...lastThreeHolds);
+                    const bestHoldThisSession = Math.max(...lastThreeHolds.map(
+                        hold => typeof hold === 'number' ? hold : (hold.duration || 0)
+                    ));
                     localStorage.setItem('wimHofLastSession', bestHoldThisSession);
                     
                     // Update monthly sessions - make sure we create a new Date object
@@ -755,8 +806,21 @@
         actionButton.addEventListener('touchstart', handleInteraction, { passive: false });
         actionButton.addEventListener('mousedown', handleInteraction);
 
+        const recordElement = document.getElementById('record');
+        recordElement.addEventListener('touchend', (e) => {
+            e.preventDefault();
+            window.location.href = '4.html';
+        });
+        recordElement.addEventListener('click', () => {
+            window.location.href = '4.html';
+        });
+
+        function isInteractiveTarget(target) {
+            return target === actionButton || target.closest('a, #record');
+        }
+
         document.body.addEventListener('touchstart', function(e) {
-            if (e.target !== actionButton) e.preventDefault();
+            if (!isInteractiveTarget(e.target)) e.preventDefault();
         }, { passive: false });
 
         document.body.addEventListener('touchmove', function(e) {
@@ -764,7 +828,7 @@
         }, { passive: false });
 
         document.body.addEventListener('touchend', function(e) {
-            if (e.target !== actionButton) e.preventDefault();
+            if (!isInteractiveTarget(e.target)) e.preventDefault();
         }, { passive: false });
 
         updateDisplay();

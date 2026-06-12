@@ -1,0 +1,1349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mind Movie</title>
+    <meta name="theme-color" content="#667eea">
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/png" href="icon-192.png">
+    <link rel="apple-touch-icon" href="icon-192.png">
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            overflow-x: hidden;
+        }
+        .background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgb(102, 126, 234) 0%, rgb(118, 75, 162) 100%);
+            z-index: -1;
+        }
+        .content {
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            padding: 10px;
+            box-sizing: border-box;
+        }
+        .card {
+            position: relative;
+            background-color: rgba(255, 255, 255, 0.9);
+            border-radius: 20px;
+            box-shadow: rgba(0, 0, 0, 0.2) 0px 10px 30px 0px;
+            color: rgb(51, 51, 51);
+            display: flex;
+            flex-direction: column;
+            width: 98%;
+            max-width: 340px;
+            padding: 15px;
+            text-align: center;
+            margin-top: 10px;
+            margin-bottom: 20px;
+            box-sizing: border-box;
+        }
+        .home-link {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            background-color: #f5f5f7;
+            color: #4a4a4a;
+            text-decoration: none;
+            font-size: 18px;
+            line-height: 1;
+        }
+        .home-link:hover {
+            background-color: #e0e0e5;
+        }
+        h1 {
+            color: rgb(51, 51, 51);
+            font-size: 1.4rem;
+            margin: 0 0 5px;
+        }
+        .subtitle {
+            color: rgb(102, 102, 102);
+            font-size: 0.8rem;
+            margin: 0 0 12px;
+        }
+        #slideList {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+        .slide-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background-color: white;
+            border: 1px solid rgb(224, 224, 224);
+            border-radius: 8px;
+            box-shadow: rgba(0, 0, 0, 0.1) 0px 2px 4px 0px;
+            padding: 8px;
+            text-align: left;
+        }
+        .slide-row .thumb {
+            width: 48px;
+            height: 48px;
+            object-fit: cover;
+            border-radius: 6px;
+            flex-shrink: 0;
+        }
+        .slide-row .slide-text {
+            flex: 1;
+            font-size: 0.85rem;
+            word-break: break-word;
+            min-width: 0;
+        }
+        .slide-row .row-controls {
+            display: flex;
+            gap: 4px;
+            flex-shrink: 0;
+            margin-left: auto;
+        }
+        .row-controls button {
+            width: 30px;
+            height: 30px;
+            border: none;
+            border-radius: 6px;
+            background-color: #f5f5f7;
+            color: #4a4a4a;
+            font-size: 13px;
+            cursor: pointer;
+            padding: 0;
+            touch-action: manipulation;
+        }
+        .row-controls button:hover {
+            background-color: #e0e0e5;
+        }
+        .row-controls button.delete {
+            color: #e53e3e;
+        }
+        #emptyState {
+            color: rgb(102, 102, 102);
+            font-size: 0.85rem;
+            padding: 14px 6px;
+            line-height: 1.5;
+        }
+        .preset-select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid rgb(224, 224, 224);
+            border-radius: 8px;
+            font-size: 14px;
+            font-family: inherit;
+            background-color: white;
+            color: #4a4a4a;
+            margin-bottom: 8px;
+            box-sizing: border-box;
+        }
+        .icon-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        .icon-btn svg {
+            flex-shrink: 0;
+        }
+        .row-controls button svg {
+            display: block;
+            margin: 0 auto;
+        }
+        .add-row {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+        .add-row input {
+            flex: 1;
+            min-width: 0;
+            padding: 10px;
+            border: 1px solid rgb(224, 224, 224);
+            border-radius: 8px;
+            font-size: 14px;
+            font-family: inherit;
+        }
+        .add-row button {
+            border: none;
+            border-radius: 8px;
+            background-color: rgb(66, 153, 225);
+            color: white;
+            font-size: 14px;
+            font-weight: 700;
+            padding: 0 14px;
+            cursor: pointer;
+            touch-action: manipulation;
+        }
+        #addImageBtn {
+            border: none;
+            border-radius: 8px;
+            background-color: rgb(66, 153, 225);
+            color: white;
+            font-size: 14px;
+            font-weight: 700;
+            padding: 10px;
+            cursor: pointer;
+            margin-bottom: 12px;
+            touch-action: manipulation;
+        }
+        .add-row button:hover, #addImageBtn:hover {
+            opacity: 0.9;
+        }
+        .duration-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            font-size: 0.85rem;
+            color: #4a4a4a;
+            margin-bottom: 12px;
+        }
+        .duration-row select {
+            padding: 6px 10px;
+            border: 1px solid rgb(224, 224, 224);
+            border-radius: 8px;
+            font-size: 14px;
+            font-family: inherit;
+            background-color: white;
+        }
+        #playBtn {
+            border: none;
+            border-radius: 25px;
+            background-color: rgb(72, 187, 120);
+            color: white;
+            font-size: 16px;
+            font-weight: 700;
+            padding: 12px;
+            cursor: pointer;
+            touch-action: manipulation;
+        }
+        #playBtn:hover {
+            opacity: 0.9;
+        }
+        #playBtn:disabled {
+            background-color: #a0aec0;
+            cursor: default;
+            opacity: 1;
+        }
+
+        #player {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgb(102, 126, 234) 0%, rgb(118, 75, 162) 100%);
+            z-index: 10;
+            display: none;
+            cursor: pointer;
+        }
+        #player.active {
+            display: block;
+        }
+        .slide {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            transition: opacity 1s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+        .slide .img {
+            position: absolute;
+            top: -5%;
+            left: -5%;
+            width: 110%;
+            height: 110%;
+            background-size: cover;
+            background-position: center;
+            will-change: transform;
+        }
+        .slide .text {
+            color: white;
+            font-size: clamp(26px, 6vw, 46px);
+            font-weight: 700;
+            text-align: center;
+            padding: 0 24px;
+            max-width: 90%;
+            line-height: 1.35;
+            text-shadow: 0 2px 12px rgba(0, 0, 0, 0.35);
+            will-change: transform;
+        }
+        @keyframes kenburns {
+            from { transform: scale(1); }
+            to { transform: scale(1.1); }
+        }
+        @keyframes textIn {
+            from { transform: scale(0.94); }
+            to { transform: scale(1); }
+        }
+        #exitHint {
+            position: absolute;
+            bottom: 24px;
+            width: 100%;
+            text-align: center;
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 14px;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="background"></div>
+    <div class="content">
+        <div class="card">
+            <a href="index.html" class="home-link" aria-label="Home"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="15 18 9 12 15 6"/></svg></a>
+            <h1 id="title"></h1>
+            <div id="subtitle" class="subtitle"></div>
+            <div id="slideList"></div>
+            <div id="emptyState"></div>
+            <select id="presetSelect" class="preset-select"></select>
+            <div class="add-row">
+                <input id="affirmationInput" type="text" maxlength="200">
+                <button id="addTextBtn"></button>
+            </div>
+            <button id="addImageBtn" class="icon-btn">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+                <span id="addImageLabel"></span>
+            </button>
+            <input type="file" id="imageInput" accept="image/*" hidden>
+            <div class="duration-row">
+                <label for="durationSelect" id="durationLabel"></label>
+                <select id="durationSelect">
+                    <option value="3">3</option>
+                    <option value="5" selected>5</option>
+                    <option value="8">8</option>
+                    <option value="10">10</option>
+                </select>
+            </div>
+            <div class="duration-row">
+                <label for="musicSelect" id="musicLabel"></label>
+                <select id="musicSelect">
+                    <option value="off"></option>
+                    <option value="calm"></option>
+                    <option value="ocean"></option>
+                    <option value="rain"></option>
+                </select>
+            </div>
+            <button id="playBtn" class="icon-btn">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><polygon points="6 3 20 12 6 21"/></svg>
+                <span id="playLabel"></span>
+            </button>
+        </div>
+    </div>
+
+    <div id="player">
+        <div id="slideA" class="slide"></div>
+        <div id="slideB" class="slide"></div>
+        <div id="exitHint"></div>
+    </div>
+
+    <script>
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('sw.js').catch(function() {});
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const translations = {
+            en: {
+                title: "Mind Movie",
+                subtitle: "Visualize your goals – watch twice a day",
+                placeholder: "Write an affirmation...",
+                add: "Add",
+                addImage: "Add Image",
+                play: "Play Movie",
+                empty: "Add affirmations and images to create your personal mind movie",
+                secondsPerSlide: "Seconds per slide",
+                deleteSlide: "Delete",
+                tapToExit: "Tap to exit",
+                storageFull: "Storage is full. Remove some images and try again.",
+                musicLabel: "Music",
+                musicOff: "Off",
+                musicCalm: "Calm tones",
+                musicOcean: "Ocean waves",
+                musicRain: "Rain",
+                presetLabel: "Choose an affirmation...",
+                presets: [
+                    "I am calm and at peace",
+                    "I am healthy and full of energy",
+                    "I believe in myself",
+                    "I am grateful for everything I have",
+                    "I reach my goals with ease",
+                    "Every day I grow stronger",
+                    "I deserve happiness and success",
+                    "I radiate love and positivity"
+                ]
+            },
+            nb: {
+                title: "Tankefilm",
+                subtitle: "Visualiser målene dine – se to ganger om dagen",
+                placeholder: "Skriv en affirmasjon...",
+                add: "Legg til",
+                addImage: "Legg til bilde",
+                play: "Spill av film",
+                empty: "Legg til affirmasjoner og bilder for å lage din personlige tankefilm",
+                secondsPerSlide: "Sekunder per bilde",
+                deleteSlide: "Slett",
+                tapToExit: "Trykk for å avslutte",
+                storageFull: "Lagringen er full. Fjern noen bilder og prøv igjen.",
+                musicLabel: "Musikk",
+                musicOff: "Av",
+                musicCalm: "Rolige toner",
+                musicOcean: "Havbølger",
+                musicRain: "Regn",
+                presetLabel: "Velg en affirmasjon...",
+                presets: [
+                    "Jeg er rolig og avslappet",
+                    "Jeg er frisk og full av energi",
+                    "Jeg tror på meg selv",
+                    "Jeg er takknemlig for alt jeg har",
+                    "Jeg når målene mine med letthet",
+                    "Hver dag blir jeg sterkere",
+                    "Jeg fortjener lykke og suksess",
+                    "Jeg utstråler kjærlighet og positivitet"
+                ]
+            },
+            zh: {
+                title: "心灵电影",
+                subtitle: "想象你的目标——每天观看两次",
+                placeholder: "写下一句肯定语...",
+                add: "添加",
+                addImage: "添加图片",
+                play: "播放影片",
+                empty: "添加肯定语和图片，创建你的专属心灵电影",
+                secondsPerSlide: "每张幻灯片秒数",
+                deleteSlide: "删除",
+                tapToExit: "点击退出",
+                storageFull: "存储空间已满。请删除一些图片后重试。",
+                musicLabel: "音乐",
+                musicOff: "关闭",
+                musicCalm: "舒缓音调",
+                musicOcean: "海浪",
+                musicRain: "雨声",
+                presetLabel: "选择一句肯定语...",
+                presets: [
+                    "我平静而安宁",
+                    "我健康且充满活力",
+                    "我相信自己",
+                    "我感恩我所拥有的一切",
+                    "我轻松实现我的目标",
+                    "我每天都变得更强大",
+                    "我值得拥有幸福和成功",
+                    "我散发着爱与正能量"
+                ]
+            },
+            es: {
+                title: "Película Mental",
+                subtitle: "Visualiza tus metas – mírala dos veces al día",
+                placeholder: "Escribe una afirmación...",
+                add: "Añadir",
+                addImage: "Añadir imagen",
+                play: "Reproducir película",
+                empty: "Añade afirmaciones e imágenes para crear tu película mental personal",
+                secondsPerSlide: "Segundos por diapositiva",
+                deleteSlide: "Eliminar",
+                tapToExit: "Toca para salir",
+                storageFull: "El almacenamiento está lleno. Elimina algunas imágenes e inténtalo de nuevo.",
+                musicLabel: "Música",
+                musicOff: "Apagada",
+                musicCalm: "Tonos relajantes",
+                musicOcean: "Olas del mar",
+                musicRain: "Lluvia",
+                presetLabel: "Elige una afirmación...",
+                presets: [
+                    "Estoy en calma y en paz",
+                    "Estoy sano y lleno de energía",
+                    "Creo en mí mismo",
+                    "Estoy agradecido por todo lo que tengo",
+                    "Alcanzo mis metas con facilidad",
+                    "Cada día me hago más fuerte",
+                    "Merezco la felicidad y el éxito",
+                    "Irradio amor y positividad"
+                ]
+            },
+            hi: {
+                title: "मन की फिल्म",
+                subtitle: "अपने लक्ष्यों की कल्पना करें – दिन में दो बार देखें",
+                placeholder: "एक सकारात्मक वाक्य लिखें...",
+                add: "जोड़ें",
+                addImage: "चित्र जोड़ें",
+                play: "फिल्म चलाएं",
+                empty: "अपनी व्यक्तिगत मन की फिल्म बनाने के लिए सकारात्मक वाक्य और चित्र जोड़ें",
+                secondsPerSlide: "प्रति स्लाइड सेकंड",
+                deleteSlide: "हटाएं",
+                tapToExit: "बाहर निकलने के लिए टैप करें",
+                storageFull: "स्टोरेज भर गया है। कुछ चित्र हटाकर फिर से प्रयास करें।",
+                musicLabel: "संगीत",
+                musicOff: "बंद",
+                musicCalm: "शांत स्वर",
+                musicOcean: "समुद्री लहरें",
+                musicRain: "बारिश",
+                presetLabel: "एक सकारात्मक वाक्य चुनें...",
+                presets: [
+                    "मैं शांत और स्थिर हूं",
+                    "मैं स्वस्थ और ऊर्जा से भरपूर हूं",
+                    "मुझे खुद पर विश्वास है",
+                    "मैं अपनी हर चीज़ के लिए आभारी हूं",
+                    "मैं आसानी से अपने लक्ष्य प्राप्त करता हूं",
+                    "हर दिन मैं और मजबूत होता हूं",
+                    "मैं खुशी और सफलता का हकदार हूं",
+                    "मैं प्रेम और सकारात्मकता फैलाता हूं"
+                ]
+            },
+            ar: {
+                title: "فيلم ذهني",
+                subtitle: "تخيل أهدافك – شاهده مرتين في اليوم",
+                placeholder: "اكتب عبارة تحفيزية...",
+                add: "إضافة",
+                addImage: "إضافة صورة",
+                play: "تشغيل الفيلم",
+                empty: "أضف عبارات تحفيزية وصورًا لإنشاء فيلمك الذهني الخاص",
+                secondsPerSlide: "ثوانٍ لكل شريحة",
+                deleteSlide: "حذف",
+                tapToExit: "انقر للخروج",
+                storageFull: "مساحة التخزين ممتلئة. احذف بعض الصور وحاول مرة أخرى.",
+                musicLabel: "موسيقى",
+                musicOff: "إيقاف",
+                musicCalm: "نغمات هادئة",
+                musicOcean: "أمواج البحر",
+                musicRain: "مطر",
+                presetLabel: "اختر عبارة تحفيزية...",
+                presets: [
+                    "أنا هادئ ومطمئن",
+                    "أنا بصحة جيدة ومليء بالطاقة",
+                    "أؤمن بنفسي",
+                    "أنا ممتن لكل ما أملك",
+                    "أحقق أهدافي بسهولة",
+                    "أزداد قوة كل يوم",
+                    "أستحق السعادة والنجاح",
+                    "أشع حبًا وإيجابية"
+                ]
+            },
+            pt: {
+                title: "Filme Mental",
+                subtitle: "Visualize seus objetivos – assista duas vezes por dia",
+                placeholder: "Escreva uma afirmação...",
+                add: "Adicionar",
+                addImage: "Adicionar imagem",
+                play: "Reproduzir filme",
+                empty: "Adicione afirmações e imagens para criar seu filme mental pessoal",
+                secondsPerSlide: "Segundos por slide",
+                deleteSlide: "Excluir",
+                tapToExit: "Toque para sair",
+                storageFull: "O armazenamento está cheio. Remova algumas imagens e tente novamente.",
+                musicLabel: "Música",
+                musicOff: "Desligada",
+                musicCalm: "Tons calmos",
+                musicOcean: "Ondas do mar",
+                musicRain: "Chuva",
+                presetLabel: "Escolha uma afirmação...",
+                presets: [
+                    "Estou calmo e em paz",
+                    "Sou saudável e cheio de energia",
+                    "Acredito em mim",
+                    "Sou grato por tudo o que tenho",
+                    "Alcanço meus objetivos com facilidade",
+                    "A cada dia fico mais forte",
+                    "Mereço felicidade e sucesso",
+                    "Irradio amor e positividade"
+                ]
+            },
+            bn: {
+                title: "মনের সিনেমা",
+                subtitle: "আপনার লক্ষ্য কল্পনা করুন – দিনে দুইবার দেখুন",
+                placeholder: "একটি ইতিবাচক বাক্য লিখুন...",
+                add: "যোগ করুন",
+                addImage: "ছবি যোগ করুন",
+                play: "সিনেমা চালান",
+                empty: "আপনার ব্যক্তিগত মনের সিনেমা তৈরি করতে ইতিবাচক বাক্য ও ছবি যোগ করুন",
+                secondsPerSlide: "প্রতি স্লাইডে সেকেন্ড",
+                deleteSlide: "মুছুন",
+                tapToExit: "বের হতে ট্যাপ করুন",
+                storageFull: "স্টোরেজ পূর্ণ। কিছু ছবি মুছে আবার চেষ্টা করুন।",
+                musicLabel: "সঙ্গীত",
+                musicOff: "বন্ধ",
+                musicCalm: "শান্ত সুর",
+                musicOcean: "সমুদ্রের ঢেউ",
+                musicRain: "বৃষ্টি",
+                presetLabel: "একটি ইতিবাচক বাক্য বেছে নিন...",
+                presets: [
+                    "আমি শান্ত ও স্থির",
+                    "আমি সুস্থ ও শক্তিতে পরিপূর্ণ",
+                    "আমি নিজের উপর বিশ্বাস রাখি",
+                    "আমার যা আছে তার জন্য আমি কৃতজ্ঞ",
+                    "আমি সহজেই আমার লক্ষ্যে পৌঁছাই",
+                    "প্রতিদিন আমি আরও শক্তিশালী হচ্ছি",
+                    "আমি সুখ ও সাফল্যের যোগ্য",
+                    "আমি ভালোবাসা ও ইতিবাচকতা ছড়িয়ে দিই"
+                ]
+            },
+            ru: {
+                title: "Ментальный фильм",
+                subtitle: "Визуализируйте свои цели – смотрите дважды в день",
+                placeholder: "Напишите аффирмацию...",
+                add: "Добавить",
+                addImage: "Добавить изображение",
+                play: "Воспроизвести фильм",
+                empty: "Добавьте аффирмации и изображения, чтобы создать свой ментальный фильм",
+                secondsPerSlide: "Секунд на слайд",
+                deleteSlide: "Удалить",
+                tapToExit: "Нажмите, чтобы выйти",
+                storageFull: "Хранилище заполнено. Удалите несколько изображений и попробуйте снова.",
+                musicLabel: "Музыка",
+                musicOff: "Выкл",
+                musicCalm: "Спокойные тона",
+                musicOcean: "Шум океана",
+                musicRain: "Дождь",
+                presetLabel: "Выберите аффирмацию...",
+                presets: [
+                    "Я спокоен и умиротворён",
+                    "Я здоров и полон энергии",
+                    "Я верю в себя",
+                    "Я благодарен за всё, что имею",
+                    "Я легко достигаю своих целей",
+                    "С каждым днём я становлюсь сильнее",
+                    "Я заслуживаю счастья и успеха",
+                    "Я излучаю любовь и позитив"
+                ]
+            },
+            ja: {
+                title: "マインドムービー",
+                subtitle: "目標をイメージしましょう – 1日2回視聴",
+                placeholder: "アファメーションを書く...",
+                add: "追加",
+                addImage: "画像を追加",
+                play: "ムービーを再生",
+                empty: "アファメーションと画像を追加して、あなただけのマインドムービーを作りましょう",
+                secondsPerSlide: "スライドあたりの秒数",
+                deleteSlide: "削除",
+                tapToExit: "タップで終了",
+                storageFull: "ストレージがいっぱいです。画像をいくつか削除してもう一度お試しください。",
+                musicLabel: "音楽",
+                musicOff: "オフ",
+                musicCalm: "穏やかな音色",
+                musicOcean: "海の波",
+                musicRain: "雨",
+                presetLabel: "アファメーションを選ぶ...",
+                presets: [
+                    "私は穏やかで安らかです",
+                    "私は健康でエネルギーに満ちています",
+                    "私は自分を信じています",
+                    "私は持っているすべてに感謝しています",
+                    "私は楽に目標を達成します",
+                    "私は日々強くなっています",
+                    "私は幸せと成功に値します",
+                    "私は愛とポジティブさを放っています"
+                ]
+            },
+            de: {
+                title: "Gedankenfilm",
+                subtitle: "Visualisieren Sie Ihre Ziele – zweimal täglich ansehen",
+                placeholder: "Schreiben Sie eine Affirmation...",
+                add: "Hinzufügen",
+                addImage: "Bild hinzufügen",
+                play: "Film abspielen",
+                empty: "Fügen Sie Affirmationen und Bilder hinzu, um Ihren persönlichen Gedankenfilm zu erstellen",
+                secondsPerSlide: "Sekunden pro Folie",
+                deleteSlide: "Löschen",
+                tapToExit: "Zum Beenden tippen",
+                storageFull: "Der Speicher ist voll. Entfernen Sie einige Bilder und versuchen Sie es erneut.",
+                musicLabel: "Musik",
+                musicOff: "Aus",
+                musicCalm: "Ruhige Klänge",
+                musicOcean: "Meereswellen",
+                musicRain: "Regen",
+                presetLabel: "Affirmation auswählen...",
+                presets: [
+                    "Ich bin ruhig und gelassen",
+                    "Ich bin gesund und voller Energie",
+                    "Ich glaube an mich",
+                    "Ich bin dankbar für alles, was ich habe",
+                    "Ich erreiche meine Ziele mit Leichtigkeit",
+                    "Jeden Tag werde ich stärker",
+                    "Ich verdiene Glück und Erfolg",
+                    "Ich strahle Liebe und Positivität aus"
+                ]
+            },
+            fr: {
+                title: "Film Mental",
+                subtitle: "Visualisez vos objectifs – à regarder deux fois par jour",
+                placeholder: "Écrivez une affirmation...",
+                add: "Ajouter",
+                addImage: "Ajouter une image",
+                play: "Lire le film",
+                empty: "Ajoutez des affirmations et des images pour créer votre film mental personnel",
+                secondsPerSlide: "Secondes par diapositive",
+                deleteSlide: "Supprimer",
+                tapToExit: "Touchez pour quitter",
+                storageFull: "Le stockage est plein. Supprimez quelques images et réessayez.",
+                musicLabel: "Musique",
+                musicOff: "Désactivée",
+                musicCalm: "Tons apaisants",
+                musicOcean: "Vagues de l'océan",
+                musicRain: "Pluie",
+                presetLabel: "Choisir une affirmation...",
+                presets: [
+                    "Je suis calme et serein",
+                    "Je suis en bonne santé et plein d'énergie",
+                    "Je crois en moi",
+                    "Je suis reconnaissant pour tout ce que j'ai",
+                    "J'atteins mes objectifs avec facilité",
+                    "Chaque jour je deviens plus fort",
+                    "Je mérite le bonheur et le succès",
+                    "Je rayonne d'amour et de positivité"
+                ]
+            },
+            ko: {
+                title: "마인드 무비",
+                subtitle: "목표를 시각화하세요 – 하루에 두 번 시청",
+                placeholder: "긍정의 문구를 적어보세요...",
+                add: "추가",
+                addImage: "이미지 추가",
+                play: "무비 재생",
+                empty: "긍정의 문구와 이미지를 추가하여 나만의 마인드 무비를 만들어보세요",
+                secondsPerSlide: "슬라이드당 초",
+                deleteSlide: "삭제",
+                tapToExit: "탭하여 종료",
+                storageFull: "저장 공간이 가득 찼습니다. 이미지를 삭제하고 다시 시도하세요.",
+                musicLabel: "음악",
+                musicOff: "끄기",
+                musicCalm: "차분한 음색",
+                musicOcean: "바다 파도",
+                musicRain: "비",
+                presetLabel: "긍정의 문구 선택...",
+                presets: [
+                    "나는 차분하고 평온하다",
+                    "나는 건강하고 에너지가 넘친다",
+                    "나는 나 자신을 믿는다",
+                    "나는 내가 가진 모든 것에 감사한다",
+                    "나는 쉽게 목표를 이룬다",
+                    "나는 매일 더 강해진다",
+                    "나는 행복과 성공을 누릴 자격이 있다",
+                    "나는 사랑과 긍정을 발산한다"
+                ]
+            },
+            it: {
+                title: "Film Mentale",
+                subtitle: "Visualizza i tuoi obiettivi – guardalo due volte al giorno",
+                placeholder: "Scrivi un'affermazione...",
+                add: "Aggiungi",
+                addImage: "Aggiungi immagine",
+                play: "Riproduci film",
+                empty: "Aggiungi affermazioni e immagini per creare il tuo film mentale personale",
+                secondsPerSlide: "Secondi per diapositiva",
+                deleteSlide: "Elimina",
+                tapToExit: "Tocca per uscire",
+                storageFull: "Lo spazio di archiviazione è pieno. Rimuovi alcune immagini e riprova.",
+                musicLabel: "Musica",
+                musicOff: "Spenta",
+                musicCalm: "Toni calmi",
+                musicOcean: "Onde del mare",
+                musicRain: "Pioggia",
+                presetLabel: "Scegli un'affermazione...",
+                presets: [
+                    "Sono calmo e in pace",
+                    "Sono sano e pieno di energia",
+                    "Credo in me stesso",
+                    "Sono grato per tutto ciò che ho",
+                    "Raggiungo i miei obiettivi con facilità",
+                    "Ogni giorno divento più forte",
+                    "Merito felicità e successo",
+                    "Irradio amore e positività"
+                ]
+            },
+            id: {
+                title: "Film Pikiran",
+                subtitle: "Visualisasikan tujuan Anda – tonton dua kali sehari",
+                placeholder: "Tulis afirmasi...",
+                add: "Tambah",
+                addImage: "Tambah Gambar",
+                play: "Putar Film",
+                empty: "Tambahkan afirmasi dan gambar untuk membuat film pikiran pribadi Anda",
+                secondsPerSlide: "Detik per slide",
+                deleteSlide: "Hapus",
+                tapToExit: "Ketuk untuk keluar",
+                storageFull: "Penyimpanan penuh. Hapus beberapa gambar dan coba lagi.",
+                musicLabel: "Musik",
+                musicOff: "Mati",
+                musicCalm: "Nada tenang",
+                musicOcean: "Ombak laut",
+                musicRain: "Hujan",
+                presetLabel: "Pilih afirmasi...",
+                presets: [
+                    "Saya tenang dan damai",
+                    "Saya sehat dan penuh energi",
+                    "Saya percaya pada diri sendiri",
+                    "Saya bersyukur atas semua yang saya miliki",
+                    "Saya mencapai tujuan saya dengan mudah",
+                    "Setiap hari saya semakin kuat",
+                    "Saya layak mendapatkan kebahagiaan dan kesuksesan",
+                    "Saya memancarkan cinta dan hal positif"
+                ]
+            },
+            tr: {
+                title: "Zihin Filmi",
+                subtitle: "Hedeflerinizi gözünüzde canlandırın – günde iki kez izleyin",
+                placeholder: "Bir olumlama yazın...",
+                add: "Ekle",
+                addImage: "Görsel Ekle",
+                play: "Filmi Oynat",
+                empty: "Kişisel zihin filminizi oluşturmak için olumlamalar ve görseller ekleyin",
+                secondsPerSlide: "Slayt başına saniye",
+                deleteSlide: "Sil",
+                tapToExit: "Çıkmak için dokunun",
+                storageFull: "Depolama alanı dolu. Birkaç görseli silip tekrar deneyin.",
+                musicLabel: "Müzik",
+                musicOff: "Kapalı",
+                musicCalm: "Sakin tonlar",
+                musicOcean: "Okyanus dalgaları",
+                musicRain: "Yağmur",
+                presetLabel: "Bir olumlama seçin...",
+                presets: [
+                    "Sakinim ve huzurluyum",
+                    "Sağlıklıyım ve enerji doluyum",
+                    "Kendime inanıyorum",
+                    "Sahip olduğum her şey için minnettarım",
+                    "Hedeflerime kolayca ulaşıyorum",
+                    "Her gün daha da güçleniyorum",
+                    "Mutluluğu ve başarıyı hak ediyorum",
+                    "Sevgi ve pozitiflik yayıyorum"
+                ]
+            },
+            nl: {
+                title: "Gedachtenfilm",
+                subtitle: "Visualiseer je doelen – bekijk twee keer per dag",
+                placeholder: "Schrijf een affirmatie...",
+                add: "Toevoegen",
+                addImage: "Afbeelding toevoegen",
+                play: "Film afspelen",
+                empty: "Voeg affirmaties en afbeeldingen toe om je persoonlijke gedachtenfilm te maken",
+                secondsPerSlide: "Seconden per dia",
+                deleteSlide: "Verwijderen",
+                tapToExit: "Tik om te stoppen",
+                storageFull: "De opslag is vol. Verwijder enkele afbeeldingen en probeer het opnieuw.",
+                musicLabel: "Muziek",
+                musicOff: "Uit",
+                musicCalm: "Rustige tonen",
+                musicOcean: "Oceaangolven",
+                musicRain: "Regen",
+                presetLabel: "Kies een affirmatie...",
+                presets: [
+                    "Ik ben kalm en in vrede",
+                    "Ik ben gezond en vol energie",
+                    "Ik geloof in mezelf",
+                    "Ik ben dankbaar voor alles wat ik heb",
+                    "Ik bereik mijn doelen met gemak",
+                    "Elke dag word ik sterker",
+                    "Ik verdien geluk en succes",
+                    "Ik straal liefde en positiviteit uit"
+                ]
+            },
+            vi: {
+                title: "Phim Tâm Trí",
+                subtitle: "Hình dung mục tiêu của bạn – xem hai lần mỗi ngày",
+                placeholder: "Viết một câu khẳng định...",
+                add: "Thêm",
+                addImage: "Thêm hình ảnh",
+                play: "Phát phim",
+                empty: "Thêm câu khẳng định và hình ảnh để tạo bộ phim tâm trí của riêng bạn",
+                secondsPerSlide: "Giây mỗi trang",
+                deleteSlide: "Xóa",
+                tapToExit: "Chạm để thoát",
+                storageFull: "Bộ nhớ đã đầy. Xóa một số hình ảnh và thử lại.",
+                musicLabel: "Âm nhạc",
+                musicOff: "Tắt",
+                musicCalm: "Âm thanh êm dịu",
+                musicOcean: "Sóng biển",
+                musicRain: "Mưa",
+                presetLabel: "Chọn một câu khẳng định...",
+                presets: [
+                    "Tôi bình tĩnh và an yên",
+                    "Tôi khỏe mạnh và tràn đầy năng lượng",
+                    "Tôi tin vào chính mình",
+                    "Tôi biết ơn tất cả những gì mình có",
+                    "Tôi đạt được mục tiêu một cách dễ dàng",
+                    "Mỗi ngày tôi càng mạnh mẽ hơn",
+                    "Tôi xứng đáng với hạnh phúc và thành công",
+                    "Tôi lan tỏa yêu thương và sự tích cực"
+                ]
+            },
+            th: {
+                title: "ภาพยนตร์ในใจ",
+                subtitle: "จินตนาการถึงเป้าหมายของคุณ – ดูวันละสองครั้ง",
+                placeholder: "เขียนคำยืนยันเชิงบวก...",
+                add: "เพิ่ม",
+                addImage: "เพิ่มรูปภาพ",
+                play: "เล่นภาพยนตร์",
+                empty: "เพิ่มคำยืนยันและรูปภาพเพื่อสร้างภาพยนตร์ในใจของคุณเอง",
+                secondsPerSlide: "วินาทีต่อสไลด์",
+                deleteSlide: "ลบ",
+                tapToExit: "แตะเพื่อออก",
+                storageFull: "พื้นที่จัดเก็บเต็ม ลบรูปภาพบางส่วนแล้วลองอีกครั้ง",
+                musicLabel: "เพลง",
+                musicOff: "ปิด",
+                musicCalm: "เสียงสงบ",
+                musicOcean: "คลื่นทะเล",
+                musicRain: "ฝน",
+                presetLabel: "เลือกคำยืนยัน...",
+                presets: [
+                    "ฉันสงบและเป็นสุข",
+                    "ฉันแข็งแรงและเต็มไปด้วยพลัง",
+                    "ฉันเชื่อมั่นในตัวเอง",
+                    "ฉันขอบคุณทุกสิ่งที่ฉันมี",
+                    "ฉันบรรลุเป้าหมายได้อย่างง่ายดาย",
+                    "ทุกวันฉันแข็งแกร่งขึ้น",
+                    "ฉันคู่ควรกับความสุขและความสำเร็จ",
+                    "ฉันเปล่งประกายความรักและพลังบวก"
+                ]
+            }
+        };
+
+        const userLang = (navigator.language || 'en').split('-')[0];
+        const lang = translations[userLang] ? userLang : 'en';
+        const t = translations[lang];
+        document.documentElement.lang = lang;
+
+        let wakeLock = null;
+        let wakeLockWanted = false;
+        async function requestWakeLock() {
+            wakeLockWanted = true;
+            if (!('wakeLock' in navigator)) return;
+            try {
+                wakeLock = await navigator.wakeLock.request('screen');
+            } catch (e) {
+                // Wake lock is best-effort; playback still works without it
+            }
+        }
+        function releaseWakeLock() {
+            wakeLockWanted = false;
+            if (wakeLock) {
+                wakeLock.release().catch(function() {});
+                wakeLock = null;
+            }
+        }
+        document.addEventListener('visibilitychange', function() {
+            if (document.visibilityState === 'visible' && wakeLockWanted) {
+                requestWakeLock();
+            }
+        });
+
+        const STORAGE_KEY = 'mindMovieSlides';
+        const DURATION_KEY = 'mindMovieDuration';
+        const MUSIC_KEY = 'mindMovieMusic';
+
+        let slides = [];
+        try {
+            slides = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+        } catch (e) {
+            slides = [];
+        }
+
+        const slideList = document.getElementById('slideList');
+        const emptyState = document.getElementById('emptyState');
+        const presetSelect = document.getElementById('presetSelect');
+        const affirmationInput = document.getElementById('affirmationInput');
+        const addTextBtn = document.getElementById('addTextBtn');
+        const addImageBtn = document.getElementById('addImageBtn');
+        const imageInput = document.getElementById('imageInput');
+        const durationSelect = document.getElementById('durationSelect');
+        const musicSelect = document.getElementById('musicSelect');
+        const playBtn = document.getElementById('playBtn');
+        const player = document.getElementById('player');
+        const layers = [document.getElementById('slideA'), document.getElementById('slideB')];
+
+        document.getElementById('title').textContent = t.title;
+        document.getElementById('subtitle').textContent = t.subtitle;
+        document.getElementById('durationLabel').textContent = t.secondsPerSlide;
+        document.getElementById('musicLabel').textContent = t.musicLabel;
+        document.getElementById('exitHint').textContent = t.tapToExit;
+        musicSelect.options[0].textContent = t.musicOff;
+        musicSelect.options[1].textContent = t.musicCalm;
+        musicSelect.options[2].textContent = t.musicOcean;
+        musicSelect.options[3].textContent = t.musicRain;
+        affirmationInput.placeholder = t.placeholder;
+        addTextBtn.textContent = t.add;
+        document.getElementById('addImageLabel').textContent = t.addImage;
+        document.getElementById('playLabel').textContent = t.play;
+
+        const placeholderOption = document.createElement('option');
+        placeholderOption.value = '';
+        placeholderOption.textContent = t.presetLabel;
+        presetSelect.appendChild(placeholderOption);
+        t.presets.forEach(function(preset) {
+            const option = document.createElement('option');
+            option.value = preset;
+            option.textContent = preset;
+            presetSelect.appendChild(option);
+        });
+        presetSelect.addEventListener('change', function() {
+            if (!presetSelect.value) return;
+            addSlide({ type: 'text', text: presetSelect.value });
+            presetSelect.selectedIndex = 0;
+        });
+
+        durationSelect.value = localStorage.getItem(DURATION_KEY) || '5';
+        durationSelect.addEventListener('change', function() {
+            localStorage.setItem(DURATION_KEY, durationSelect.value);
+        });
+
+        musicSelect.value = localStorage.getItem(MUSIC_KEY) || 'calm';
+        if (!musicSelect.value) musicSelect.value = 'calm';
+        musicSelect.addEventListener('change', function() {
+            localStorage.setItem(MUSIC_KEY, musicSelect.value);
+        });
+
+        // Ambient soundscapes synthesized with the Web Audio API: no audio
+        // files to download or cache, and the loops have no seam
+        const ambient = (function() {
+            let ctx = null;
+            let master = null;
+
+            function makeNoiseBuffer(context, brown) {
+                const length = context.sampleRate * 4;
+                const buffer = context.createBuffer(1, length, context.sampleRate);
+                const data = buffer.getChannelData(0);
+                let last = 0;
+                for (let i = 0; i < length; i++) {
+                    const white = Math.random() * 2 - 1;
+                    if (brown) {
+                        last = (last + 0.02 * white) / 1.02;
+                        data[i] = last * 3.5;
+                    } else {
+                        data[i] = white;
+                    }
+                }
+                return buffer;
+            }
+
+            function makeNoiseSource(context, brown) {
+                const source = context.createBufferSource();
+                source.buffer = makeNoiseBuffer(context, brown);
+                source.loop = true;
+                source.start();
+                return source;
+            }
+
+            // Slow sine wobble applied to an AudioParam (gain, filter cutoff...)
+            function addLfo(context, param, frequency, depth) {
+                const osc = context.createOscillator();
+                osc.frequency.value = frequency;
+                const gain = context.createGain();
+                gain.gain.value = depth;
+                osc.connect(gain);
+                gain.connect(param);
+                osc.start();
+            }
+
+            function buildCalm(context, out) {
+                // A soft Cadd9 voicing; each voice swells in and out at its
+                // own pace so the chord slowly evolves
+                const voices = [
+                    { freq: 130.81, rate: 0.031 },
+                    { freq: 196.00, rate: 0.043 },
+                    { freq: 261.63, rate: 0.057 },
+                    { freq: 293.66, rate: 0.071 },
+                    { freq: 392.00, rate: 0.067 }
+                ];
+                const filter = context.createBiquadFilter();
+                filter.type = 'lowpass';
+                filter.frequency.value = 900;
+                addLfo(context, filter.frequency, 0.02, 250);
+                filter.connect(out);
+                voices.forEach(function(voice) {
+                    const gain = context.createGain();
+                    gain.gain.value = 0.1;
+                    addLfo(context, gain.gain, voice.rate, 0.08);
+                    [-3, 3].forEach(function(cents) {
+                        const osc = context.createOscillator();
+                        osc.type = 'sine';
+                        osc.frequency.value = voice.freq;
+                        osc.detune.value = cents;
+                        osc.connect(gain);
+                        osc.start();
+                    });
+                    gain.connect(filter);
+                });
+                return 0.35;
+            }
+
+            function buildOcean(context, out) {
+                const filter = context.createBiquadFilter();
+                filter.type = 'lowpass';
+                filter.frequency.value = 420;
+                addLfo(context, filter.frequency, 0.07, 160);
+                const swell = context.createGain();
+                swell.gain.value = 0.55;
+                // Two LFOs at different rates make the waves irregular
+                addLfo(context, swell.gain, 0.08, 0.3);
+                addLfo(context, swell.gain, 0.131, 0.13);
+                makeNoiseSource(context, true).connect(filter);
+                filter.connect(swell);
+                swell.connect(out);
+                return 0.5;
+            }
+
+            function buildRain(context, out) {
+                const highpass = context.createBiquadFilter();
+                highpass.type = 'highpass';
+                highpass.frequency.value = 1100;
+                const lowpass = context.createBiquadFilter();
+                lowpass.type = 'lowpass';
+                lowpass.frequency.value = 6000;
+                const gain = context.createGain();
+                gain.gain.value = 0.9;
+                addLfo(context, gain.gain, 0.23, 0.07);
+                makeNoiseSource(context, false).connect(highpass);
+                highpass.connect(lowpass);
+                lowpass.connect(gain);
+                gain.connect(out);
+                return 0.16;
+            }
+
+            function start(type) {
+                stop();
+                if (type === 'off') return;
+                const AC = window.AudioContext || window.webkitAudioContext;
+                if (!AC) return;
+                try {
+                    ctx = new AC();
+                    ctx.resume().catch(function() {});
+                    master = ctx.createGain();
+                    master.gain.value = 0;
+                    master.connect(ctx.destination);
+                    const builders = { calm: buildCalm, ocean: buildOcean, rain: buildRain };
+                    const level = builders[type](ctx, master);
+                    master.gain.linearRampToValueAtTime(level, ctx.currentTime + 2.5);
+                } catch (e) {
+                    ctx = null;
+                    master = null;
+                }
+            }
+
+            function stop() {
+                if (!ctx) return;
+                const oldCtx = ctx;
+                const oldMaster = master;
+                ctx = null;
+                master = null;
+                try {
+                    oldMaster.gain.cancelScheduledValues(oldCtx.currentTime);
+                    oldMaster.gain.setValueAtTime(oldMaster.gain.value, oldCtx.currentTime);
+                    oldMaster.gain.linearRampToValueAtTime(0, oldCtx.currentTime + 0.8);
+                } catch (e) {}
+                setTimeout(function() {
+                    oldCtx.close().catch(function() {});
+                }, 1000);
+            }
+
+            return { start: start, stop: stop };
+        })();
+
+        function saveSlides() {
+            try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(slides));
+                return true;
+            } catch (e) {
+                alert(t.storageFull);
+                return false;
+            }
+        }
+
+        function renderList() {
+            slideList.innerHTML = '';
+            emptyState.textContent = slides.length ? '' : t.empty;
+            playBtn.disabled = slides.length === 0;
+
+            slides.forEach(function(slide, i) {
+                const row = document.createElement('div');
+                row.className = 'slide-row';
+
+                if (slide.type === 'image') {
+                    const thumb = document.createElement('img');
+                    thumb.className = 'thumb';
+                    thumb.src = slide.src;
+                    thumb.alt = '';
+                    row.appendChild(thumb);
+                } else {
+                    const text = document.createElement('div');
+                    text.className = 'slide-text';
+                    text.textContent = slide.text;
+                    row.appendChild(text);
+                }
+
+                const controls = document.createElement('div');
+                controls.className = 'row-controls';
+
+                const icon = function(paths) {
+                    return '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + paths + '</svg>';
+                };
+
+                const upBtn = document.createElement('button');
+                upBtn.innerHTML = icon('<polyline points="6 15 12 9 18 15"/>');
+                upBtn.setAttribute('aria-label', 'Move up');
+                upBtn.disabled = i === 0;
+                upBtn.addEventListener('click', function() {
+                    slides.splice(i - 1, 0, slides.splice(i, 1)[0]);
+                    saveSlides();
+                    renderList();
+                });
+
+                const downBtn = document.createElement('button');
+                downBtn.innerHTML = icon('<polyline points="6 9 12 15 18 9"/>');
+                downBtn.setAttribute('aria-label', 'Move down');
+                downBtn.disabled = i === slides.length - 1;
+                downBtn.addEventListener('click', function() {
+                    slides.splice(i + 1, 0, slides.splice(i, 1)[0]);
+                    saveSlides();
+                    renderList();
+                });
+
+                const deleteBtn = document.createElement('button');
+                deleteBtn.className = 'delete';
+                deleteBtn.innerHTML = icon('<polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>');
+                deleteBtn.setAttribute('aria-label', t.deleteSlide);
+                deleteBtn.addEventListener('click', function() {
+                    slides.splice(i, 1);
+                    saveSlides();
+                    renderList();
+                });
+
+                controls.appendChild(upBtn);
+                controls.appendChild(downBtn);
+                controls.appendChild(deleteBtn);
+                row.appendChild(controls);
+                slideList.appendChild(row);
+            });
+        }
+
+        function addSlide(slide) {
+            slides.push(slide);
+            if (!saveSlides()) {
+                slides.pop();
+            }
+            renderList();
+        }
+
+        function addAffirmation() {
+            const text = affirmationInput.value.trim();
+            if (!text) return;
+            addSlide({ type: 'text', text: text });
+            affirmationInput.value = '';
+        }
+
+        addTextBtn.addEventListener('click', addAffirmation);
+        affirmationInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') addAffirmation();
+        });
+
+        addImageBtn.addEventListener('click', function() {
+            imageInput.click();
+        });
+
+        imageInput.addEventListener('change', function() {
+            const file = imageInput.files[0];
+            imageInput.value = '';
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function() {
+                const img = new Image();
+                img.onload = function() {
+                    // Downscale and re-encode as JPEG so a movie's worth of
+                    // images fits within the localStorage quota
+                    const maxSize = 1000;
+                    const scale = Math.min(1, maxSize / Math.max(img.width, img.height));
+                    const canvas = document.createElement('canvas');
+                    canvas.width = Math.round(img.width * scale);
+                    canvas.height = Math.round(img.height * scale);
+                    canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+                    addSlide({ type: 'image', src: canvas.toDataURL('image/jpeg', 0.72) });
+                };
+                img.src = reader.result;
+            };
+            reader.readAsDataURL(file);
+        });
+
+        let playTimer = null;
+        let playIndex = 0;
+        let activeLayer = 0;
+
+        function renderSlideInto(el, slide, duration) {
+            el.innerHTML = '';
+            if (slide.type === 'image') {
+                const img = document.createElement('div');
+                img.className = 'img';
+                img.style.backgroundImage = 'url("' + slide.src + '")';
+                img.style.animation = 'kenburns ' + (duration + 1.5) + 's ease-out forwards';
+                el.appendChild(img);
+            } else {
+                const text = document.createElement('div');
+                text.className = 'text';
+                text.textContent = slide.text;
+                text.style.animation = 'textIn ' + (duration + 1.5) + 's ease-out forwards';
+                el.appendChild(text);
+            }
+        }
+
+        function advance() {
+            const duration = parseInt(durationSelect.value, 10);
+            const next = layers[1 - activeLayer];
+            renderSlideInto(next, slides[playIndex % slides.length], duration);
+            next.style.opacity = '1';
+            layers[activeLayer].style.opacity = '0';
+            activeLayer = 1 - activeLayer;
+            playIndex++;
+        }
+
+        function startPlayback() {
+            if (!slides.length) return;
+            playIndex = 0;
+            player.classList.add('active');
+            requestWakeLock();
+            ambient.start(musicSelect.value);
+            if (document.documentElement.requestFullscreen) {
+                document.documentElement.requestFullscreen().catch(function() {});
+            }
+            advance();
+            playTimer = setInterval(advance, parseInt(durationSelect.value, 10) * 1000);
+        }
+
+        function stopPlayback() {
+            clearInterval(playTimer);
+            playTimer = null;
+            player.classList.remove('active');
+            layers.forEach(function(layer) {
+                layer.style.opacity = '0';
+                layer.innerHTML = '';
+            });
+            ambient.stop();
+            releaseWakeLock();
+            if (document.fullscreenElement) {
+                document.exitFullscreen().catch(function() {});
+            }
+        }
+
+        playBtn.addEventListener('click', startPlayback);
+        player.addEventListener('click', stopPlayback);
+
+        renderList();
+    });
+    </script>
+</body>
+</html>

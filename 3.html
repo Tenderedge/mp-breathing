@@ -1,9 +1,13 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Nadi Shodhana</title>
+    <meta name="theme-color" content="#667eea">
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/png" href="icon-192.png">
+    <link rel="apple-touch-icon" href="icon-192.png">
     <style>
         body, html {
             margin: 0;
@@ -29,6 +33,7 @@
             box-sizing: border-box;
         }
         .card {
+            position: relative;
             background-color: rgba(255, 255, 255, 0.9);
             border-radius: 20px;
             box-shadow: rgba(0, 0, 0, 0.2) 0px 10px 30px 0px;
@@ -67,6 +72,7 @@
             font-weight: bold;
             color: #4a4a4a;
             background-color: white;
+            will-change: transform;
         }
         .step {
             background-color: rgb(255, 255, 255);
@@ -118,12 +124,32 @@
         button:hover {
             opacity: 0.9;
         }
+        .home-link {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            background-color: #f5f5f7;
+            color: #4a4a4a;
+            text-decoration: none;
+            font-size: 18px;
+            line-height: 1;
+        }
+        .home-link:hover {
+            background-color: #e0e0e5;
+        }
     </style>
 </head>
 <body>
     <div class="background"></div>
     <div class="content">
         <div class="card">
+            <a href="index.html" class="home-link" aria-label="Home"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="15 18 9 12 15 6"/></svg></a>
             <h1 id="title"></h1>
             <div id="subtitle" class="subtitle"></div>
             <div class="timer-circle" id="timer">5</div>
@@ -137,6 +163,10 @@
     </div>
 
     <script>
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('sw.js').catch(function() {});
+    }
+
     document.addEventListener('DOMContentLoaded', function() {
         try {
             const translations = {
@@ -238,7 +268,231 @@
                     stopBtn: "Parar",
                     restartBtn: "Reiniciar"
                 },
-                
+                ru: {
+                    title: "Попеременное дыхание через ноздри",
+                    subtitle: "Используйте правую руку: большой палец для правой ноздри, безымянный — для левой",
+                    steps: [
+                        "Закройте правую ноздрю большим пальцем, вдохните через левую",
+                        "Закройте левую ноздрю безымянным пальцем, откройте правую и выдохните",
+                        "Вдохните через правую ноздрю",
+                        "Закройте правую, откройте левую и выдохните"
+                    ],
+                    cyclesText: "Завершено раундов: {0} из 4",
+                    startBtn: "Начать",
+                    stopBtn: "Остановить",
+                    restartBtn: "Начать заново"
+                },
+                ja: {
+                    title: "交互鼻呼吸",
+                    subtitle: "右手を使います：親指で右の鼻孔、薬指で左の鼻孔を押さえます",
+                    steps: [
+                        "親指で右の鼻孔を閉じ、左の鼻孔から息を吸う",
+                        "薬指で左の鼻孔を閉じ、右を開いて息を吐く",
+                        "右の鼻孔から息を吸う",
+                        "右を閉じ、左を開いて息を吐く"
+                    ],
+                    cyclesText: "完了したラウンド：{0} / 4",
+                    startBtn: "開始",
+                    stopBtn: "停止",
+                    restartBtn: "再開"
+                },
+                de: {
+                    title: "Wechselatmung",
+                    subtitle: "Benutzen Sie die rechte Hand: Daumen für das rechte Nasenloch, Ringfinger für das linke",
+                    steps: [
+                        "Rechtes Nasenloch mit dem Daumen schließen, durch das linke einatmen",
+                        "Linkes Nasenloch mit dem Ringfinger schließen, rechtes öffnen und ausatmen",
+                        "Durch das rechte Nasenloch einatmen",
+                        "Rechtes schließen, linkes öffnen und ausatmen"
+                    ],
+                    cyclesText: "Abgeschlossene Runden: {0} von 4",
+                    startBtn: "Start",
+                    stopBtn: "Stopp",
+                    restartBtn: "Neu starten"
+                },
+                fr: {
+                    title: "Respiration Alternée",
+                    subtitle: "Utilisez votre main droite : pouce pour la narine droite, annulaire pour la gauche",
+                    steps: [
+                        "Fermez la narine droite avec le pouce, inspirez par la gauche",
+                        "Fermez la narine gauche avec l'annulaire, ouvrez la droite et expirez",
+                        "Inspirez par la narine droite",
+                        "Fermez la droite, ouvrez la gauche et expirez"
+                    ],
+                    cyclesText: "Séries terminées : {0} sur 4",
+                    startBtn: "Commencer",
+                    stopBtn: "Arrêter",
+                    restartBtn: "Recommencer"
+                },
+                ko: {
+                    title: "교대 콧구멍 호흡",
+                    subtitle: "오른손 사용: 엄지는 오른쪽 콧구멍, 약지는 왼쪽 콧구멍",
+                    steps: [
+                        "엄지로 오른쪽 콧구멍을 막고 왼쪽으로 숨을 들이쉬세요",
+                        "약지로 왼쪽 콧구멍을 막고 오른쪽을 열어 숨을 내쉬세요",
+                        "오른쪽 콧구멍으로 숨을 들이쉬세요",
+                        "오른쪽을 막고 왼쪽을 열어 숨을 내쉬세요"
+                    ],
+                    cyclesText: "완료된 라운드: {0} / 4",
+                    startBtn: "시작",
+                    stopBtn: "정지",
+                    restartBtn: "다시 시작"
+                },
+                it: {
+                    title: "Respirazione Alternata",
+                    subtitle: "Usa la mano destra: pollice per la narice destra, anulare per la sinistra",
+                    steps: [
+                        "Chiudi la narice destra con il pollice, inspira dalla sinistra",
+                        "Chiudi la narice sinistra con l'anulare, apri la destra ed espira",
+                        "Inspira dalla narice destra",
+                        "Chiudi la destra, apri la sinistra ed espira"
+                    ],
+                    cyclesText: "Round completati: {0} di 4",
+                    startBtn: "Inizia",
+                    stopBtn: "Ferma",
+                    restartBtn: "Ricomincia"
+                },
+                tr: {
+                    title: "Alternatif Burun Nefesi",
+                    subtitle: "Sağ elinizi kullanın: başparmak sağ burun deliği, yüzük parmağı sol burun deliği için",
+                    steps: [
+                        "Başparmağınızla sağ burun deliğini kapatın, soldan nefes alın",
+                        "Yüzük parmağınızla sol burun deliğini kapatın, sağı açın ve nefes verin",
+                        "Sağ burun deliğinden nefes alın",
+                        "Sağı kapatın, solu açın ve nefes verin"
+                    ],
+                    cyclesText: "Tamamlanan turlar: {0} / 4",
+                    startBtn: "Başla",
+                    stopBtn: "Dur",
+                    restartBtn: "Yeniden Başla"
+                },
+                vi: {
+                    title: "Hít Thở Luân Phiên Mũi",
+                    subtitle: "Dùng tay phải: ngón cái cho lỗ mũi phải, ngón áp út cho lỗ mũi trái",
+                    steps: [
+                        "Bịt lỗ mũi phải bằng ngón cái, hít vào qua lỗ mũi trái",
+                        "Bịt lỗ mũi trái bằng ngón áp út, mở lỗ mũi phải và thở ra",
+                        "Hít vào qua lỗ mũi phải",
+                        "Bịt lỗ mũi phải, mở lỗ mũi trái và thở ra"
+                    ],
+                    cyclesText: "Số vòng đã hoàn thành: {0} / 4",
+                    startBtn: "Bắt đầu",
+                    stopBtn: "Dừng lại",
+                    restartBtn: "Bắt đầu lại"
+                },
+                pl: {
+                    title: "Naprzemienne oddychanie nozdrzami",
+                    subtitle: "Użyj prawej ręki: kciuk na prawe nozdrze, palec serdeczny na lewe",
+                    steps: [
+                        "Zamknij prawe nozdrze kciukiem, wdychaj przez lewe",
+                        "Zamknij lewe nozdrze palcem serdecznym, otwórz prawe i wydychaj",
+                        "Wdychaj przez prawe nozdrze",
+                        "Zamknij prawe, otwórz lewe i wydychaj"
+                    ],
+                    cyclesText: "Ukończone rundy: {0} z 4",
+                    startBtn: "Start",
+                    stopBtn: "Stop",
+                    restartBtn: "Rozpocznij ponownie"
+                },
+                uk: {
+                    title: "Поперемінне дихання через ніздрі",
+                    subtitle: "Використовуйте праву руку: великий палець для правої ніздрі, підмізинний — для лівої",
+                    steps: [
+                        "Закрийте праву ніздрю великим пальцем, вдихніть через ліву",
+                        "Закрийте ліву ніздрю підмізинним пальцем, відкрийте праву і видихніть",
+                        "Вдихніть через праву ніздрю",
+                        "Закрийте праву, відкрийте ліву і видихніть"
+                    ],
+                    cyclesText: "Завершено раундів: {0} з 4",
+                    startBtn: "Почати",
+                    stopBtn: "Зупинити",
+                    restartBtn: "Почати заново"
+                },
+                nl: {
+                    title: "Wisselende Neusademhaling",
+                    subtitle: "Gebruik je rechterhand: duim voor het rechterneusgat, ringvinger voor het linker",
+                    steps: [
+                        "Sluit het rechterneusgat met je duim, adem in door het linker",
+                        "Sluit het linkerneusgat met je ringvinger, open het rechter en adem uit",
+                        "Adem in door het rechterneusgat",
+                        "Sluit het rechter, open het linker en adem uit"
+                    ],
+                    cyclesText: "Voltooide rondes: {0} van 4",
+                    startBtn: "Start",
+                    stopBtn: "Stop",
+                    restartBtn: "Opnieuw starten"
+                },
+                th: {
+                    title: "การหายใจสลับรูจมูก",
+                    subtitle: "ใช้มือขวา: นิ้วโป้งสำหรับรูจมูกขวา นิ้วนางสำหรับรูจมูกซ้าย",
+                    steps: [
+                        "ปิดรูจมูกขวาด้วยนิ้วโป้ง หายใจเข้าทางรูจมูกซ้าย",
+                        "ปิดรูจมูกซ้ายด้วยนิ้วนาง เปิดรูจมูกขวาแล้วหายใจออก",
+                        "หายใจเข้าทางรูจมูกขวา",
+                        "ปิดรูจมูกขวา เปิดรูจมูกซ้ายแล้วหายใจออก"
+                    ],
+                    cyclesText: "รอบที่เสร็จสมบูรณ์: {0} จาก 4",
+                    startBtn: "เริ่ม",
+                    stopBtn: "หยุด",
+                    restartBtn: "เริ่มใหม่"
+                },
+                sv: {
+                    title: "Växelvis näsandning",
+                    subtitle: "Använd höger hand: tummen för höger näsborre, ringfingret för vänster",
+                    steps: [
+                        "Stäng höger näsborre med tummen, andas in genom vänster",
+                        "Stäng vänster näsborre med ringfingret, öppna höger och andas ut",
+                        "Andas in genom höger näsborre",
+                        "Stäng höger, öppna vänster och andas ut"
+                    ],
+                    cyclesText: "Avslutade rundor: {0} av 4",
+                    startBtn: "Starta",
+                    stopBtn: "Stoppa",
+                    restartBtn: "Starta om"
+                },
+                id: {
+                    title: "Pernapasan Hidung Bergantian",
+                    subtitle: "Gunakan tangan kanan: ibu jari untuk lubang hidung kanan, jari manis untuk kiri",
+                    steps: [
+                        "Tutup lubang hidung kanan dengan ibu jari, tarik napas melalui kiri",
+                        "Tutup lubang hidung kiri dengan jari manis, buka kanan dan hembuskan",
+                        "Tarik napas melalui lubang hidung kanan",
+                        "Tutup kanan, buka kiri dan hembuskan"
+                    ],
+                    cyclesText: "Putaran selesai: {0} dari 4",
+                    startBtn: "Mulai",
+                    stopBtn: "Berhenti",
+                    restartBtn: "Mulai Ulang"
+                },
+                bn: {
+                    title: "পর্যায়ক্রমিক নাসিকা শ্বাস",
+                    subtitle: "ডান হাত ব্যবহার করুন: ডান নাসারন্ধ্রের জন্য বুড়ো আঙুল, বাম নাসারন্ধ্রের জন্য অনামিকা",
+                    steps: [
+                        "বুড়ো আঙুল দিয়ে ডান নাসারন্ধ্র বন্ধ করুন, বাম দিয়ে শ্বাস নিন",
+                        "অনামিকা দিয়ে বাম নাসারন্ধ্র বন্ধ করুন, ডান খুলে শ্বাস ছাড়ুন",
+                        "ডান নাসারন্ধ্র দিয়ে শ্বাস নিন",
+                        "ডান বন্ধ করুন, বাম খুলে শ্বাস ছাড়ুন"
+                    ],
+                    cyclesText: "সম্পূর্ণ রাউন্ড: {0} / 4",
+                    startBtn: "শুরু",
+                    stopBtn: "থামুন",
+                    restartBtn: "আবার শুরু করুন"
+                },
+                ro: {
+                    title: "Respirație alternativă pe nări",
+                    subtitle: "Folosește mâna dreaptă: degetul mare pentru nara dreaptă, inelarul pentru stânga",
+                    steps: [
+                        "Închide nara dreaptă cu degetul mare, inspiră prin stânga",
+                        "Închide nara stângă cu inelarul, deschide dreapta și expiră",
+                        "Inspiră prin nara dreaptă",
+                        "Închide dreapta, deschide stânga și expiră"
+                    ],
+                    cyclesText: "Runde finalizate: {0} din 4",
+                    startBtn: "Start",
+                    stopBtn: "Stop",
+                    restartBtn: "Reîncepe"
+                },
+
             };
 
             function getLanguage() {
@@ -249,6 +503,31 @@
 
             const lang = getLanguage();
             const t = translations[lang];
+            document.documentElement.lang = lang;
+
+            let wakeLock = null;
+            let wakeLockWanted = false;
+            async function requestWakeLock() {
+                wakeLockWanted = true;
+                if (!('wakeLock' in navigator)) return;
+                try {
+                    wakeLock = await navigator.wakeLock.request('screen');
+                } catch (e) {
+                    // Wake lock is best-effort; the exercise still works without it
+                }
+            }
+            function releaseWakeLock() {
+                wakeLockWanted = false;
+                if (wakeLock) {
+                    wakeLock.release().catch(function() {});
+                    wakeLock = null;
+                }
+            }
+            document.addEventListener('visibilitychange', function() {
+                if (document.visibilityState === 'visible' && wakeLockWanted) {
+                    requestWakeLock();
+                }
+            });
 
             let currentStep = 0;
             let isRunning = false;
@@ -266,6 +545,19 @@
                 updateDisplay();
             }
 
+            // Grow the circle while inhaling (steps 0 and 2) and shrink it
+            // while exhaling (steps 1 and 3), as a visual pacing guide
+            function animateGuide() {
+                const circle = document.getElementById('timer');
+                if (!isRunning) {
+                    circle.style.transition = 'transform 0.5s ease';
+                    circle.style.transform = 'scale(1)';
+                    return;
+                }
+                circle.style.transition = 'transform 5s ease-in-out';
+                circle.style.transform = currentStep % 2 === 0 ? 'scale(1.2)' : 'scale(1)';
+            }
+
             function updateDisplay() {
                 document.getElementById('timer').textContent = seconds;
                 document.getElementById('cycleCounter').textContent = t.cyclesText.replace('{0}', cycles);
@@ -273,6 +565,7 @@
                     const stepElement = document.getElementById(`step${index}`);
                     stepElement.classList.toggle('active', index === currentStep);
                 });
+                animateGuide();
             }
 
             function nextStep() {
@@ -297,8 +590,9 @@
             }
 
             function startExercise() {
-                updateDisplay();
                 isRunning = true;
+                requestWakeLock();
+                updateDisplay();
                 document.getElementById('controlBtn').textContent = t.stopBtn;
                 timer = setInterval(function() {
                     if (seconds > 1) {
@@ -313,6 +607,7 @@
             function stopExercise() {
                 clearInterval(timer);
                 isRunning = false;
+                releaseWakeLock();
                 document.getElementById('controlBtn').textContent = t.restartBtn;
                 currentStep = 0;
                 cycles = 0;

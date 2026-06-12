@@ -1,9 +1,13 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Breathing Statistics</title>
+    <meta name="theme-color" content="#667eea">
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/png" href="icon-192.png">
+    <link rel="apple-touch-icon" href="icon-192.png">
     <style>
         * {
             -webkit-tap-highlight-color: transparent;
@@ -183,6 +187,10 @@
     </div>
 
     <script>
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('sw.js').catch(function() {});
+        }
+
         const translations = {
             en: {
                 title: "Breathing Statistics",
@@ -569,15 +577,23 @@
         }
 
         // Update the updateDisplay function to also update the calendar
+        const backLabels = {
+            en: 'Back', nb: 'Tilbake', es: 'Volver', zh: '返回', hi: 'वापस',
+            ar: 'رجوع', pt: 'Voltar', ru: 'Назад', ja: '戻る', de: 'Zurück',
+            fr: 'Retour', ko: '뒤로', it: 'Indietro', tr: 'Geri', vi: 'Quay lại',
+            pl: 'Wstecz'
+        };
+
         function updateDisplay() {
             const userLang = navigator.language.split('-')[0];
             const t = translations[userLang] || translations.en;
-            
+            document.documentElement.lang = translations[userLang] ? userLang : 'en';
+
             // Update page text
             document.getElementById('title').textContent = t.title;
             document.getElementById('headerMetric').textContent = t.headerMetric;
             document.getElementById('headerValue').textContent = t.headerValue;
-            document.getElementById('backButton').textContent = "Back";
+            document.getElementById('backButton').textContent = backLabels[userLang] || backLabels.en;
 
             const stats = getStats();
             const tbody = document.getElementById('statsBody');
